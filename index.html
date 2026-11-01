@@ -150,8 +150,6 @@ main {padding:10px}
 .force-tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .display-strip-row{display:flex;flex-wrap:nowrap}
 .display-strip h2{flex:none}
-.playback-options{padding:8px 2px 0}
-.playback-options .option{font-size:13px}
 .motion-note{margin-top:7px;padding:9px 11px;border:1px solid #e8d5a9;border-radius:8px;background:#fff9ea;color:#76531c;font-size:13px;line-height:1.4}
 .motion-note .btn{margin-top:6px;font-size:13px;min-height:30px}
 .stat .reading{flex-wrap:wrap;row-gap:2px;white-space:normal}
@@ -180,13 +178,14 @@ main {padding:10px}
 .control-panel .display-strip h2{margin:-2px -2px 8px;font-size:16px}
 .control-panel .display-strip .options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 6px;overflow:visible;padding:2px 0}
 .control-panel .display-strip .option{font-size:12.5px;font-weight:650;gap:5px;margin:0!important}
-.control-panel .playback-options{margin-top:8px;padding-top:8px;border-top:1px solid #e6edf5}
-.control-panel .playback-options .option{font-size:12.5px}
+.control-panel .display-strip .option.wide{grid-column:1 / -1}
+.control-panel .group h2{position:relative;justify-content:center;text-align:center}
+.control-panel .group h2::before{position:absolute;left:10px}
 .control-panel textarea.eqbox{display:block;height:auto;min-height:78px;resize:vertical;line-height:1.45;font-size:14px;white-space:pre-wrap}
 .control-panel .nudge-control-row{grid-template-columns:70px minmax(0,1fr)}
 .control-panel .nudge-control-row .btn.nudge{font-size:13.5px}
 .readout-panel{padding:10px}
-.sidebar-title{margin:0 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:#4b6180}
+.sidebar-title{margin:0 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:#4b6180;text-align:center}
 .readout-panel .statbar{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;margin:0}
 .readout-panel .stat{min-height:75px;padding:9px 5px}
 .readout-panel .stat .name{font-size:13px}
@@ -253,7 +252,6 @@ main {padding:10px}
  </div>
  <div class="btnrow"><button id="play" class="btn primary">▶ Play</button><button id="reset" class="btn">↺ Reset</button></div>
  <div class="btnrow snap-row"><button id="snapNearest" class="btn highlight">◎ Snap to nearest equilibrium</button></div>
- <label class="option" style="margin-top:8px"><input type="checkbox" id="snapDrag"> Snap to equilibria while dragging</label>
 </section>
 <section class="group nudge-group"><h2>Nudge</h2>
  <div class="nudge-control-row">
@@ -274,9 +272,9 @@ main {padding:10px}
       <label class="option"><input type="checkbox" id="showKE"> KE</label>
       <label class="option"><input type="checkbox" id="showEquilibria"> Equilibria</label>
       <label class="option"><input type="checkbox" id="showGrid"> Grid</label>
+      <label class="option wide"><input type="checkbox" id="pauseOutside" checked> Pause outside view</label>
     </div>
   </div>
- <div class="playback-options"><label class="option"><input type="checkbox" id="pauseOutside" checked> Pause outside view</label></div>
   <div id="notice" class="msg" role="status"></div>
  </section>
 </aside>
@@ -766,7 +764,7 @@ syncAxisLimits();
 function pointerPos(e){const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height};}
 function hitPoint(x,y){if(state.mode!=='points')return null;let target=null,best=14**2;for(const p of state.points){const d=(x-projectX(p.x))**2+(y-projectY(p.u))**2;if(d<best){best=d;target=p;}}return target;}
 function snapPosition(x,force=false){if(!state.eqs.length)return x;const nearest=state.eqs.reduce((a,b)=>Math.abs(b.x-x)<Math.abs(a.x-x)?b:a);const distance=Math.abs(nearest.x-x);return force||distance<(state.view.xmax-state.view.xmin)*.025?nearest.x:x;}
-function dragBlockAt(mx){let x=clamp(unprojectX(mx),state.view.xmin,state.view.xmax);if($('snapDrag').checked)x=snapPosition(x);$('x0').value=Number(x.toFixed(5));setAt(x,num('initialKE',0));fitEnergyIfNeeded();draw();}
+function dragBlockAt(mx){let x=clamp(unprojectX(mx),state.view.xmin,state.view.xmax);x=snapPosition(x);$('x0').value=Number(x.toFixed(5));setAt(x,num('initialKE',0));fitEnergyIfNeeded();draw();}
 canvas.addEventListener('pointerdown',e=>{const p=pointerPos(e);if(state.playing||state.nudge)return;if(Math.abs(p.y-(trackY-31))<27&&Math.abs(p.x-projectX(state.x))<30){state.drag={type:'block'};canvas.setPointerCapture(e.pointerId);dragBlockAt(p.x);return;}
 const point=hitPoint(p.x,p.y);if(point){state.selected=point;state.drag={type:'point',point};canvas.setPointerCapture(e.pointerId);draw();return;}
 if(state.mode==='points'&&state.adding&&p.x>=box.left&&p.x<=box.right&&p.y>=box.top&&p.y<=box.bottom){const x=unprojectX(p.x),u=unprojectU(p.y);if(state.points.some(a=>Math.abs(a.x-x)<(state.view.xmax-state.view.xmin)*.012)){msg('A registration point is too close to that x-coordinate.');return;}const np={x,u};state.points.push(np);sortPts();invalidate();state.selected=np;updateEquilibria();reset();draw();}}
