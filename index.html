@@ -170,6 +170,11 @@ main {padding:10px}
 .lineicon.link{width:0;height:18px;border-top:0;border-left:2px dashed #b4bfcc;margin:0 5px}
 .display-strip .options{flex-wrap:nowrap;justify-content:space-between;column-gap:22px;min-width:0;overflow-x:auto;padding:3px 2px}
 .display-strip .option{flex:none}
+.force-panel{margin-top:8px;border:1px solid #ddd6ed;border-radius:12px;overflow:hidden;background:#fff}
+.force-heading{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px 16px;padding:10px 13px;background:#f7f4fc;color:#68449f;font-size:14px}
+.force-heading h2{margin:0;font-size:15px}
+.force-heading output{font-weight:750;font-variant-numeric:tabular-nums}
+.force-panel canvas{display:block;width:100%;height:auto}
 </style>
 </head>
 <body>
@@ -211,12 +216,17 @@ main {padding:10px}
 <main class="panel">
  <div class="topbar"><div class="legend"><span><i class="lineicon"></i> U(x)</span><span><i class="lineicon energy"></i> E</span><span><i class="lineicon link"></i> Same position</span></div><div class="top-actions"><button class="btn" id="fitTop" title="Fit curve and energy into view">⤢ Fit view</button></div></div>
  <div class="plot-wrap"><canvas id="plot" width="1100" height="618" aria-label="Potential energy graph with a marble on the curve and an aligned block on the x-axis"></canvas></div>
+ <section id="forcePanel" class="force-panel hidden" aria-label="Force versus position">
+  <div class="force-heading"><h2>Force · Fₓ = −dU/dx</h2><output id="forceRead" aria-live="off"></output></div>
+  <canvas id="forcePlot" width="1100" height="260" role="img" aria-label="Force versus position, aligned with the potential energy graph"></canvas>
+ </section>
  <section class="display-strip" aria-label="Display controls">
   <div class="display-strip-row">
     <h2>Display</h2>
     <div class="options">
       <label class="option"><input type="checkbox" id="showMarble" checked> Marble on curve</label>
       <label class="option"><input type="checkbox" id="showEnergy" checked> Total energy E</label>
+      <label class="option"><input type="checkbox" id="showForcePlot" aria-controls="forcePanel"> Force plot</label>
       <label class="option"><input type="checkbox" id="showForce"> Force arrow</label>
       <label class="option"><input type="checkbox" id="showKE"> KE</label>
       <label class="option"><input type="checkbox" id="showEquilibria"> Equilibria</label>
@@ -251,6 +261,8 @@ main {padding:10px}
 'use strict';
 const $=id=>document.getElementById(id), canvas=$('plot'), c=canvas.getContext('2d');
 const W=1100,H=618,box={left:86,right:1031,top:76,bottom:475},trackY=574;
+const forceCanvas=$('forcePlot'),fc=forceCanvas.getContext('2d');
+let forceProfile=null;
 const state={mode:'points',adding:false,points:[],selected:null,drag:null,playing:false,t0:null,view:{xmin:0,xmax:10,umin:-1,umax:11},m:1,x:1.2,v:0,E:0,acc:0,eqFn:null,expression:'',nudge:null,eqs:[],msgTimeout:null,hover:null};
 const sample=[{x:0.18,u:8.7},{x:1.20,u:4.1},{x:2.35,u:1.05},{x:5.12,u:5.55},{x:7.35,u:2.36},{x:9.7,u:9.4}];
 function clamp(x,a,b){return Math.max(a,Math.min(b,x));}
@@ -309,7 +321,7 @@ function roots(){
  }
  return result;
 }
-function updateEquilibria(){state.eqs=roots();}
+function updateEquilibria(){state.eqs=roots();forceProfile=null;}
 function outsideView(){return state.x<state.view.xmin?'left':state.x>state.view.xmax?'right':null;}
 function syncPlay(){
  $('play').textContent=state.playing?'Ⅱ Pause':'▶ Play';
@@ -412,6 +424,90 @@ function drawEquilibriumMarkers(){
  }
  c.restore();
 }
+// Reuse the force that drives the motion; omit undefined slopes at corners.
+function plottedForce(x){
+ const f=F(x);
+ if(state.mode==='points')return f;
+ const h=(state.view.xmax-state.view.xmin)*1e-4,u=U(x);
+ const left=-(u-U(x-h))/h,right=-(U(x+h)-u)/h;
+ if(!Number.isFinite(left)||!Number.isFinite(right)||Math.abs(left-right)>.02*Math.max(1,Math.abs(left),Math.abs(right)))return NaN;
+ return f;
+}
+function getForceProfile(){
+ const {xmin,xmax}=state.view;
+ if(forceProfile&&forceProfile.xmin===xmin&&forceProfile.xmax===xmax)return forceProfile;
+ const samples=[],N=900;
+ let peak=0,previous=null;
+ for(let i=0;i<=N;i++){
+  const x=xmin+(xmax-xmin)*i/N,f=plottedForce(x);
+  let join=previous&&Number.isFinite(previous.f)&&Number.isFinite(f);
+  if(join&&state.mode==='equation'){
+   const middle=plottedForce((previous.x+x)/2);
+   // Do not bridge a jump in the derivative, even between sampled positions.
+   join=Number.isFinite(middle)&&Math.abs(middle-(previous.f+f)/2)<=Math.max(.02*Math.max(1,Math.abs(f),Math.abs(previous.f)),.25*Math.abs(f-previous.f));
+  }
+  if(Number.isFinite(f))peak=Math.max(peak,Math.abs(f));
+  previous={x,f,join};samples.push(previous);
+ }
+ // Symmetric, stable auto-scale leaves zero visible for every potential.
+ const target=peak>0?peak*1.15:1,power=10**Math.floor(Math.log10(target));
+ const limit=Math.ceil(target/power*2)/2*power;
+ return forceProfile={xmin,xmax,samples,limit};
+}
+function forceLabel(f){
+ if(!Number.isFinite(f))return 'undefined';
+ return Math.abs(f)>=1e4||(Math.abs(f)>0&&Math.abs(f)<.01)?f.toExponential(1):fmt(f);
+}
+function drawForcePlot(){
+ const visible=$('showForcePlot').checked;
+ $('forcePanel').classList.toggle('hidden',!visible);
+ if(!visible)return;
+ const {samples,limit}=getForceProfile(),top=38,bottom=208,zero=(top+bottom)/2;
+ const fy=f=>zero-f/limit*(bottom-top)/2,color='#8054bd';
+ const segment=(x1,y1,x2,y2,stroke,width=1,dash=[])=>{
+  fc.beginPath();fc.setLineDash(dash);fc.strokeStyle=stroke;fc.lineWidth=width;
+  fc.moveTo(x1,y1);fc.lineTo(x2,y2);fc.stroke();fc.setLineDash([]);
+ };
+ fc.clearRect(0,0,W,260);fc.fillStyle='#fcfbfe';fc.fillRect(box.left,top,box.right-box.left,bottom-top);
+ fc.font='700 15px system-ui';fc.fillStyle='#526882';
+ for(let i=0;i<=4;i++){
+  const f=limit*(1-i/2),y=fy(f);
+  if($('showGrid').checked&&i!==2)segment(box.left,y,box.right,y,'#eee9f5');
+  segment(box.left-5,y,box.left,y,'#9eacba');
+  fc.textAlign='right';fc.fillText(forceLabel(f),box.left-10,y+5);
+ }
+ for(let i=0;i<=10;i++){
+  const x=state.view.xmin+(state.view.xmax-state.view.xmin)*i/10,sx=projectX(x);
+  if($('showGrid').checked)segment(sx,top,sx,bottom,'#eee9f5');
+  segment(sx,bottom,sx,bottom+5,'#9eacba');
+  fc.textAlign='center';fc.fillText(Number(x.toFixed(2)).toString(),sx,bottom+23);
+ }
+ segment(box.left,zero,box.right,zero,'#a99abf',1.6);
+ segment(box.left,top,box.left,bottom,'#6c7e93',1.6);
+ segment(box.left,bottom,box.right,bottom,'#6c7e93',1.6);
+ fc.textAlign='left';fc.font='800 20px system-ui';fc.fillStyle='#68449f';
+ fc.fillText('Fₓ (N)',box.left-63,25);fc.fillText('x (m)',box.right+8,bottom+6);
+ fc.save();fc.beginPath();fc.rect(box.left,top,box.right-box.left,bottom-top);fc.clip();
+ if($('showEquilibria').checked){
+  for(const eq of state.eqs)segment(projectX(eq.x),top,projectX(eq.x),bottom,'#bcb0cf',1,[4,5]);
+ }
+ fc.beginPath();
+ for(const sample of samples){
+  if(!Number.isFinite(sample.f))continue;
+  if(sample.join)fc.lineTo(projectX(sample.x),fy(sample.f));else fc.moveTo(projectX(sample.x),fy(sample.f));
+ }
+ fc.strokeStyle=color;fc.lineWidth=3;fc.lineJoin='round';fc.stroke();
+ const current=plottedForce(state.x),px=projectX(state.x);
+ if(!outsideView()){
+  segment(px,top,px,bottom,'#b9a8d3',1.4,[5,6]);
+  if(Number.isFinite(current)){
+   fc.beginPath();fc.arc(px,fy(current),6,0,Math.PI*2);fc.fillStyle=color;fc.fill();fc.strokeStyle='#fff';fc.lineWidth=2;fc.stroke();
+  }
+ }
+ fc.restore();
+ $('forceRead').textContent=`x = ${fmt(state.x)} m · Fₓ = ${forceLabel(current)}${Number.isFinite(current)?' N':''}`;
+ forceCanvas.setAttribute('aria-label',`Force versus position. At x = ${fmt(state.x)} metres, force is ${forceLabel(current)}${Number.isFinite(current)?' newtons':''}.`);
+}
 function draw(){const s=state.view;c.clearRect(0,0,W,H);c.fillStyle='#ffffff';c.fillRect(0,0,W,H);
 // top plot field
 rounded(box.left,box.top,box.right-box.left,box.bottom-box.top,4,'#fbfdff');
@@ -475,6 +571,7 @@ if($('showForce').checked){let f=F(state.x),L=Math.min(94,Math.abs(f)*7),d=Math.
 // The block receives the same brief, stationary strike at its original position.
 if(state.nudge){const n=state.nudge;drawHand(projectX(n.startX),by,n.dir,nudgeProgress(n.age),17);}
 c.restore();
+drawForcePlot();
 }
 function pointerPos(e){const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height};}
 function hitPoint(x,y){if(state.mode!=='points')return null;let target=null,best=14**2;for(const p of state.points){const d=(x-projectX(p.x))**2+(y-projectY(p.u))**2;if(d<best){best=d;target=p;}}return target;}
@@ -548,7 +645,7 @@ $('nudgeLeft').addEventListener('click',()=>{nudge(-1);});$('nudgeRight').addEve
 $('snapNearest').addEventListener('click',()=>{if(!state.eqs.length){msg('No isolated equilibrium point found in this range.');return;}stop();const x=snapPosition(state.x,true);$('x0').value=Number(x.toFixed(6));setAt(x,num('initialKE',0));fitEnergyIfNeeded();draw();});
 for(const id of ['x0','initialKE','mass','direction'])$(id).addEventListener('change',()=>{stop();reset();});
 $('speed').addEventListener('change',()=>{state.t0=null;});
-for(const id of ['showMarble','showEnergy','showForce','showKE','showEquilibria','showGrid'])$(id).addEventListener('change',draw);
+for(const id of ['showMarble','showEnergy','showForcePlot','showForce','showKE','showEquilibria','showGrid'])$(id).addEventListener('change',draw);
 function applyRanges(){let xmin=num('xmin',0),xmax=num('xmax',10),umin=num('umin',-1),umax=num('umax',11);if(xmax-xmin<.5||umax-umin<.5){msg('The displayed x and U ranges must each span at least 0.5.');return;}state.view={xmin,xmax,umin,umax};updateEquilibria();reset();}
 $('toggleRange').addEventListener('click',()=>{const editor=$('rangeEditor'),opening=editor.classList.contains('hidden');editor.classList.toggle('hidden',!opening);$('toggleRange').setAttribute('aria-expanded',String(opening));});
 $('applyAxes').addEventListener('click',applyRanges);$('fitAxes').addEventListener('click',fit);$('fitTop').addEventListener('click',fit);
