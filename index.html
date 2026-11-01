@@ -191,9 +191,6 @@ main {padding:10px}
 .readout-panel .statbar{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;margin:0}
 .readout-panel .stat{min-height:75px;padding:9px 5px}
 .readout-panel .stat .name{font-size:13px;width:100%;text-align:center}
-.energy-monitor{margin-top:9px;padding:8px 3px;border-top:1px solid #e3eaf2;text-align:center;color:#60748e;font-size:11.5px;line-height:1.45;font-variant-numeric:tabular-nums}
-.energy-monitor output{display:block;overflow-wrap:anywhere}
-.energy-monitor.warning{color:#9b5c0b}
 .readout-panel .stat .number{font-size:26px}
 .readout-panel .stat .number.scientific{font-size:20px}
 .readout-panel .stat .unit{font-size:13px}
@@ -304,7 +301,6 @@ main {padding:10px}
   <div class="stat"><div class="name">Kinetic, KE</div><div class="reading"><span id="keRead" class="number">0.00</span><span class="unit">J</span></div></div>
   <div class="stat"><div class="name">Total, E</div><div class="reading"><span id="eRead" class="number energytext">0.00</span><span class="unit">J</span></div></div>
  </div>
- <div class="energy-monitor" id="energyMonitor" title="Difference between the calculated total energy and its value at reset, accounting for energy added by nudges."><span>Energy drift</span><output id="energyDrift">0.00 J</output></div>
 </aside>
 </div></div>
 <form id="axisEditor" class="axis-editor hidden" role="dialog" aria-labelledby="axisEditLabel">
@@ -476,11 +472,6 @@ function reset(){state.nudge=null;stop();setAt(num('x0',1.2),num('initialKE',0))
 function updateStats(){
  const k=.5*state.m*state.v*state.v;
  for(const [id,value] of [['xRead',state.x],['vRead',state.v],['aRead',state.acc],['uRead',U(state.x)],['keRead',k],['eRead',state.E]])setReading(id,value);
- const error=state.E-state.referenceE,relative=Math.abs(error)/state.energyScale;
- const drift=Math.abs(error)<state.energyScale*1e-12?'0.00':`${error>0?'+':''}${error.toExponential(2)}`;
- $('energyDrift').textContent=`${drift} J`;
- $('energyMonitor').classList.toggle('warning',relative>.001);
- $('energyMonitor').title=`Calculated total minus expected total, including nudges. Expected: ${state.referenceE} J. Drift: ${error} J. Motion pauses if drift exceeds 1% of max(1 J, |expected energy|).`;
  let near=state.eqs.find(e=>Math.abs(e.x-state.x)<.015);$('eqStatus').textContent=near?`${near.kind[0].toUpperCase()+near.kind.slice(1)} equilibrium at x = ${fmt(near.x)} m`:' ';
 }
 function fitEnergyIfNeeded(){if(!state.uManual&&state.E>state.view.umax-.3)state.view.umax=state.E+Math.max(1,(state.view.umax-state.view.umin)*.10);}
@@ -842,7 +833,7 @@ function advance(h){
  }
  const total=next.u+next.k;
  if(!Number.isFinite(total)||Math.abs(total-state.referenceE)>.01*state.energyScale){
-  pauseMotion('precision','The next step would exceed the 1% energy-drift limit. Reset and try a less steep potential or a larger mass.');return;
+  pauseMotion('precision','The motion has reached the simulation’s accuracy limit. Reset and try a less steep potential or a larger mass.');return;
  }
  state.x=next.x;state.v=next.v;state.acc=next.acc;state.E=total;state.simTime+=h;
  if(reachedEdge)pauseMotion('edge',`The particle reached the ${reachedEdge} edge of the view without bouncing. Expand the position limits or continue outside the view.`);
