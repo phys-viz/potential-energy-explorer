@@ -317,7 +317,7 @@ const W=1100,H=618,box={left:86,right:1031,top:76,bottom:475},trackY=574;
 const PHYSICS_STEP=.005;
 const forceCanvas=$('forcePlot'),fc=forceCanvas.getContext('2d');
 let forceProfile=null;
-const state={mode:'points',adding:false,points:[],selected:null,drag:null,playing:false,t0:null,stepRemainder:0,simTime:0,view:{xmin:0,xmax:10,umin:-1,umax:11},forceView:null,uManual:false,pauseReason:null,m:1,x:1.2,v:0,E:0,referenceE:0,energyScale:1,acc:0,eqFn:null,expression:'',nudge:null,eqs:[],msgTimeout:null,hover:null};
+const state={mode:'points',adding:false,points:[],selected:null,drag:null,playing:false,t0:null,stepRemainder:0,simTime:0,view:{xmin:0,xmax:10,umin:0,umax:12},forceView:null,uManual:false,pauseReason:null,m:1,x:1.2,v:0,E:0,referenceE:0,energyScale:1,acc:0,eqFn:null,expression:'',nudge:null,eqs:[],msgTimeout:null,hover:null};
 const sample=[{x:0.18,u:8.7},{x:1.20,u:4.1},{x:2.35,u:1.05},{x:5.12,u:5.55},{x:7.35,u:2.36},{x:9.7,u:9.4}];
 function clamp(x,a,b){return Math.max(a,Math.min(b,x));}
 function num(id,fallback){let v=Number($(id).value);return Number.isFinite(v)?v:fallback;}
@@ -903,7 +903,7 @@ window.addEventListener('resize',()=>{if(axisEditing)closeAxisEditor();});
 $('autoForce').addEventListener('click',()=>{state.forceView=null;draw();});
 $('fitTop').addEventListener('click',fit);
 // Initialize
-createAxisLimits();state.points=sample.map(p=>({...p}));sortPts();invalidate();state.mode='equation';state.expression=$('equation').value;state.eqFn=compile(state.expression);updateEquilibria();setAt(num('x0',1.2),0);syncPlay();validNudgeEnergy();fit();
+createAxisLimits();state.points=sample.map(p=>({...p}));sortPts();invalidate();state.mode='equation';state.expression=$('equation').value;state.eqFn=compile(state.expression);updateEquilibria();setAt(num('x0',1.2),0);syncPlay();validNudgeEnergy();draw();
 })();
 </script>
 <script data-goatcounter="https://phys-viz.goatcounter.com/count"
