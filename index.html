@@ -19,30 +19,9 @@
 .display-strip .options{display:flex;align-items:center;flex-wrap:wrap;gap:7px 15px;flex:1 1 530px}
 .display-strip .option{white-space:nowrap;font-size:12.5px;gap:5px}
 .display-strip .option input{margin:0}
-.range-toggle{flex:none;display:inline-flex;align-items:center;gap:6px;margin-left:auto;border:1px solid #d9e4f0;background:#fff;color:#3d5778;border-radius:8px;min-height:32px;padding:5px 10px;font-size:12px;font-weight:750;white-space:nowrap}
-.range-toggle:hover{background:#ecf3fd;border-color:#b9cde6}
-.range-toggle[aria-expanded="true"]{border-color:#aac5e8;background:#edf5ff}
-.range-chevron{font-size:12px;display:inline-block;transition:transform .15s ease}
-.range-toggle[aria-expanded="true"] .range-chevron{transform:rotate(180deg)}
-.range-editor-wrap{margin-top:9px;padding-top:10px;border-top:1px solid #e0e8f2}
-.range-editor{width:100%;max-width:1000px;margin:0 auto;display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) minmax(176px,1.5fr);gap:10px;align-items:end}
-.range-editor .field{min-width:0}
-.range-editor .field label{font-size:11.5px;white-space:nowrap}
-.range-editor .field input{height:34px}
-.range-actions{display:flex;gap:7px;min-width:0;align-items:center}
-.range-actions .btn{flex:1;min-width:0;min-height:34px;padding:6px 7px;font-size:11.5px;white-space:nowrap}
 .display-strip #notice{margin-top:8px}
-@media(max-width:1270px){
-  .range-editor{grid-template-columns:repeat(4,minmax(0,1fr));max-width:730px}
-  .range-actions{grid-column:1/-1;justify-content:center}
-  .range-actions .btn{flex:0 1 175px}
-}
 @media(max-width:800px){
   .display-strip .options{flex-basis:100%;gap:9px 13px}
-  .range-toggle{margin-left:0}
-  .range-editor{grid-template-columns:repeat(2,minmax(0,1fr));max-width:490px}
-  .range-actions{grid-column:1/-1}
-  .range-actions .btn{flex:1}
 }
 
 /* Version 13 — stronger hierarchy, colored section names and classroom-readable data. */
@@ -67,7 +46,6 @@ aside {padding:12px}
 .display-strip {background:#f8fafc;padding:10px 13px}
 .display-strip h2 {font-size:13px;font-weight:850;color:#334c6a;letter-spacing:.55px}
 .display-strip .option {font-size:13.2px;font-weight:670}
-.range-toggle {font-size:12.8px;font-weight:780}
 .statbar {gap:9px;margin-top:12px}
 .stat {background:linear-gradient(180deg,#ffffff,#f8fbff);border:1px solid #dce5ef;border-radius:11px;padding:12px 5px 11px;box-shadow:0 3px 10px rgba(35,62,94,.045)}
 .stat .name {font-size:12.7px;font-weight:820;color:#4b6180;letter-spacing:.08px;margin-bottom:2px}
@@ -120,12 +98,6 @@ main {padding:10px}
 .display-strip .options {gap:6px 14px}
 .display-strip .option {font-size:14px;font-weight:680;gap:6px}
 .display-strip .option input {transform:scale(1.13)}
-.range-toggle {min-height:31px;font-size:13.5px;padding:4px 8px}
-.range-editor-wrap {margin-top:7px;padding-top:8px}
-.range-editor {gap:7px}
-.range-editor .field label {font-size:13.5px}
-.range-editor .field input {height:36px}
-.range-actions .btn {font-size:13.5px}
 .status {padding:5px 3px 0;font-size:13.5px}
 .statbar {gap:6px;margin-top:6px}
 .stat {padding:6px 4px 7px;min-height:67px;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
@@ -159,13 +131,6 @@ main {padding:10px}
  .display-strip .option {font-size:13.5px}
 }
 
-/* Keep the range control aligned with the Display heading on smaller screens. */
-@media(max-width:1150px){
- .display-strip-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px 8px}
- .display-strip h2{grid-column:1;grid-row:1;align-self:center}
- .display-strip .options{grid-column:1 / -1;grid-row:2;flex-basis:auto;gap:6px 13px}
- .range-toggle{grid-column:2;grid-row:1;margin-left:0;justify-self:end}
-}
 /* Match the position guide and distribute display controls on one row. */
 .lineicon.link{width:0;height:18px;border-top:0;border-left:2px dashed #b4bfcc;margin:0 5px}
 .display-strip .options{flex-wrap:nowrap;justify-content:space-between;column-gap:22px;min-width:0;overflow-x:auto;padding:3px 2px}
@@ -175,6 +140,37 @@ main {padding:10px}
 .force-heading h2{margin:0;font-size:15px}
 .force-heading output{font-weight:750;font-variant-numeric:tabular-nums}
 .force-panel canvas{display:block;width:100%;height:auto}
+.axis-plot{position:relative}
+.axis-limit{position:absolute;transform:translate(-50%,-50%);padding:2px 4px;border:0;border-bottom:1px dotted #7b98bd;border-radius:3px;background:#fff;color:#365e90;font:700 clamp(11px,1.05vw,15px)/1.1 system-ui;min-height:24px;white-space:nowrap;cursor:text}
+.axis-limit.y-limit{transform:translate(-100%,-50%)}
+.axis-limit[data-axis="xmin"]{transform:translate(0,-50%)}
+.axis-limit[data-axis="xmax"]{transform:translate(-100%,-50%)}
+.axis-limit:hover,.axis-limit:focus-visible{background:#e8f1ff;outline:2px solid #8eb3ed}
+.force-heading .btn{min-height:28px;font-size:12px;padding:4px 7px;color:#68449f}
+.force-tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.display-strip-row{display:flex;flex-wrap:nowrap}
+.display-strip h2{flex:none}
+.playback-options{padding:8px 2px 0}
+.playback-options .option{font-size:13px}
+.motion-note{margin-top:7px;padding:9px 11px;border:1px solid #e8d5a9;border-radius:8px;background:#fff9ea;color:#76531c;font-size:13px;line-height:1.4}
+.motion-note .btn{margin-top:6px;font-size:13px;min-height:30px}
+.stat .reading{flex-wrap:wrap;row-gap:2px;white-space:normal}
+.stat .number{white-space:nowrap}
+.stat .number.scientific{font-size:clamp(16px,1.6vw,22px);letter-spacing:-.4px}
+.scientific .times{font-size:.65em;margin:0 1px}
+.scientific sup{font-size:.6em;vertical-align:super;letter-spacing:0}
+.axis-editor{position:fixed;z-index:10;width:260px;max-width:calc(100vw - 16px);padding:12px;background:#fff;border:1px solid #b9cee9;border-radius:10px;box-shadow:0 10px 35px #18263a30}
+.axis-editor label{display:block;font-size:14px;font-weight:750;margin-bottom:7px;color:#365e90}
+.axis-editor input{width:100%;padding:8px;font:inherit;border:1px solid #b9cee9;border-radius:6px}
+.axis-editor .btnrow{justify-content:flex-end}
+.axis-editor .btn{min-height:32px;font-size:13px}
+.axis-editor .hint{margin-top:6px}
+.axis-hint{font-size:12px;color:#65748a;align-self:center}
+.top-actions{flex-wrap:wrap}
+@media(max-width:760px){
+ .axis-limit.y-limit{transform:translate(0,0);min-height:20px;padding:1px 3px;font-size:11px}
+ .axis-limit[data-axis="umin"],.axis-limit[data-axis="fmin"]{transform:translate(0,calc(-100% - 7px))}
+}
 </style>
 </head>
 <body>
@@ -214,11 +210,11 @@ main {padding:10px}
 
 </aside>
 <main class="panel">
- <div class="topbar"><div class="legend"><span><i class="lineicon"></i> U(x)</span><span><i class="lineicon energy"></i> E</span><span><i class="lineicon link"></i> Same position</span></div><div class="top-actions"><button class="btn" id="fitTop" title="Fit curve and energy into view">⤢ Fit view</button></div></div>
- <div class="plot-wrap"><canvas id="plot" width="1100" height="618" aria-label="Potential energy graph with a marble on the curve and an aligned block on the x-axis"></canvas></div>
+ <div class="topbar"><div class="legend"><span><i class="lineicon"></i> U(x)</span><span><i class="lineicon energy"></i> E</span><span><i class="lineicon link"></i> Same position</span></div><div class="top-actions"><span class="axis-hint">Click an axis limit to edit</span><button class="btn" id="fitTop" title="Fit potential and energy, and restore automatic force scaling">⤢ Fit view</button></div></div>
+ <div class="plot-wrap axis-plot" id="potentialPlot"><canvas id="plot" width="1100" height="618" aria-label="Potential energy graph with a marble on the curve and an aligned block on the x-axis"></canvas></div>
  <section id="forcePanel" class="force-panel hidden" aria-label="Force versus position">
-  <div class="force-heading"><h2>Force · Fₓ = −dU/dx</h2><output id="forceRead" aria-live="off"></output></div>
-  <canvas id="forcePlot" width="1100" height="260" role="img" aria-label="Force versus position, aligned with the potential energy graph"></canvas>
+  <div class="force-heading"><h2>Force · Fₓ = −dU/dx</h2><div class="force-tools"><output id="forceRead" aria-live="off"></output><button type="button" class="btn on" id="autoForce" aria-pressed="true" title="Automatically fit the force scale">Auto scale</button></div></div>
+  <div class="axis-plot" id="forcePlotWrap"><canvas id="forcePlot" width="1100" height="260" role="img" aria-label="Force versus position, aligned with the potential energy graph"></canvas></div>
  </section>
  <section class="display-strip" aria-label="Display controls">
   <div class="display-strip-row">
@@ -232,19 +228,11 @@ main {padding:10px}
       <label class="option"><input type="checkbox" id="showEquilibria"> Equilibria</label>
       <label class="option"><input type="checkbox" id="showGrid"> Grid</label>
     </div>
-    <button class="range-toggle" type="button" id="toggleRange" aria-expanded="false" aria-controls="rangeEditor"><span class="range-chevron">▾</span> Graph range</button>
-  </div>
-  <div id="rangeEditor" class="range-editor-wrap hidden">
-    <div class="range-editor">
-      <div class="field"><label for="xmin">x min (m)</label><input id="xmin" type="number" value="0" step="0.5"></div>
-      <div class="field"><label for="xmax">x max (m)</label><input id="xmax" type="number" value="10" step="0.5"></div>
-      <div class="field"><label for="umin">U min (J)</label><input id="umin" type="number" value="-1" step="1"></div>
-      <div class="field"><label for="umax">U max (J)</label><input id="umax" type="number" value="11" step="1"></div>
-      <div class="range-actions"><button class="btn" id="applyAxes">Apply range</button><button class="btn" id="fitAxes">Fit U and E</button></div>
-    </div>
   </div>
   <div id="notice" class="msg" role="status"></div>
  </section>
+ <div class="playback-options"><label class="option"><input type="checkbox" id="pauseOutside" checked> Pause outside view</label></div>
+ <div id="motionNote" class="motion-note hidden" role="status"><div id="motionText"></div><button type="button" class="btn" id="continueOutside">Continue outside view</button></div>
  <div class="status"><span id="statusText">Paused</span><span id="eqStatus">—</span></div>
  <div class="statbar">
   <div class="stat"><div class="name">Position, x</div><div class="reading"><span id="xRead" class="number">1.20</span><span class="unit">m</span></div></div>
@@ -256,6 +244,12 @@ main {padding:10px}
  </div>
 </main>
 </div></div>
+<form id="axisEditor" class="axis-editor hidden" role="dialog" aria-labelledby="axisEditLabel">
+ <label id="axisEditLabel" for="axisValue">Axis limit</label>
+ <input id="axisValue" type="number" step="any" required aria-describedby="axisError">
+ <div id="axisError" class="hint hint-error" role="alert"></div>
+ <div class="btnrow"><button type="submit" class="btn primary">Apply</button><button type="button" class="btn" id="cancelAxis">Cancel</button></div>
+</form>
 <script>
 (()=>{
 'use strict';
@@ -263,11 +257,19 @@ const $=id=>document.getElementById(id), canvas=$('plot'), c=canvas.getContext('
 const W=1100,H=618,box={left:86,right:1031,top:76,bottom:475},trackY=574;
 const forceCanvas=$('forcePlot'),fc=forceCanvas.getContext('2d');
 let forceProfile=null;
-const state={mode:'points',adding:false,points:[],selected:null,drag:null,playing:false,t0:null,view:{xmin:0,xmax:10,umin:-1,umax:11},m:1,x:1.2,v:0,E:0,acc:0,eqFn:null,expression:'',nudge:null,eqs:[],msgTimeout:null,hover:null};
+const state={mode:'points',adding:false,points:[],selected:null,drag:null,playing:false,t0:null,view:{xmin:0,xmax:10,umin:-1,umax:11},forceView:null,uManual:false,pauseReason:null,m:1,x:1.2,v:0,E:0,acc:0,eqFn:null,expression:'',nudge:null,eqs:[],msgTimeout:null,hover:null};
 const sample=[{x:0.18,u:8.7},{x:1.20,u:4.1},{x:2.35,u:1.05},{x:5.12,u:5.55},{x:7.35,u:2.36},{x:9.7,u:9.4}];
 function clamp(x,a,b){return Math.max(a,Math.min(b,x));}
 function num(id,fallback){let v=Number($(id).value);return Number.isFinite(v)?v:fallback;}
-function fmt(x){if(!Number.isFinite(x))return '—';if(Math.abs(x)<.005)return '0.00';return x.toFixed(2);}
+function scientific(x){return Math.abs(x)>=1000||(Math.abs(x)>0&&Math.abs(x)<.005);}
+function fmt(x){if(!Number.isFinite(x))return '—';return scientific(x)?x.toExponential(2):x.toFixed(2);}
+function setReading(id,value){
+ const node=$(id),sci=Number.isFinite(value)&&scientific(value);
+ node.classList.toggle('scientific',sci);
+ if(sci){const [mantissa,exponent]=value.toExponential(2).split('e');node.innerHTML=`${mantissa}<span class="times">×</span>10<sup>${Number(exponent)}</sup>`;}
+ else node.textContent=fmt(value);
+ node.title=Number.isFinite(value)?String(value):'Undefined';
+}
 function msg(text){const node=$('notice');node.textContent=text;node.classList.add('show');clearTimeout(state.msgTimeout);state.msgTimeout=setTimeout(()=>node.classList.remove('show'),3200);}
 function sortPts(){state.points.sort((a,b)=>a.x-b.x);}
 function slopes(){const pts=state.points,n=pts.length,ms=new Array(n).fill(0);if(n<2)return ms;const delta=[],h=[];for(let i=0;i<n-1;i++){h.push(Math.max(.0001,pts[i+1].x-pts[i].x));delta.push((pts[i+1].u-pts[i].u)/h[i]);}if(n===2)return [delta[0],delta[0]];
@@ -395,15 +397,20 @@ function updateEquilibria(){state.eqs=roots();forceProfile=null;}
 function outsideView(){return state.x<state.view.xmin?'left':state.x>state.view.xmax?'right':null;}
 function syncPlay(){
  $('play').textContent=state.playing?'Ⅱ Pause':'▶ Play';
+ $('play').disabled=state.pauseReason?.kind==='precision';
  const side=outsideView();
- $('statusText').textContent=state.nudge?'Nudging':state.playing?(side?`Playing · beyond ${side} edge of graph`:'Playing'):(side?`Paused · beyond ${side} edge of graph`:'Paused');
+ $('statusText').textContent=state.pauseReason?`Paused · ${state.pauseReason.kind==='edge'?'reached edge of view':'numerical precision limit'}`:state.nudge?'Nudging':state.playing?(side?`Playing · beyond ${side} edge of graph`:'Playing'):(side?`Paused · beyond ${side} edge of graph`:'Paused');
+ $('motionNote').classList.toggle('hidden',!state.pauseReason);
+ $('motionText').textContent=state.pauseReason?.text||'';
+ $('continueOutside').classList.toggle('hidden',state.pauseReason?.kind!=='edge');
 }
 function stop(){state.playing=false;state.t0=null;syncPlay();}
-function setAt(x,ke){state.x=clamp(x,state.view.xmin,state.view.xmax);let K=Math.max(0,ke),dir=num('direction',1);state.m=Math.max(.01,num('mass',1));state.v=dir*Math.sqrt(2*K/state.m);state.acc=F(state.x)/state.m;state.E=U(state.x)+K;updateStats();}
+function pauseMotion(kind,text){state.pauseReason={kind,text};stop();}
+function setAt(x,ke){state.pauseReason=null;state.x=clamp(x,state.view.xmin,state.view.xmax);let K=Math.max(0,ke),dir=num('direction',1);state.m=Math.max(.01,num('mass',1));state.v=dir*Math.sqrt(2*K/state.m);state.acc=F(state.x)/state.m;state.E=U(state.x)+K;syncPlay();updateStats();}
 function reset(){state.nudge=null;stop();setAt(num('x0',1.2),num('initialKE',0));fitEnergyIfNeeded();draw();}
-function updateStats(){const k=.5*state.m*state.v*state.v; $('xRead').textContent=fmt(state.x);$('vRead').textContent=fmt(state.v);$('aRead').textContent=fmt(state.acc);$('uRead').textContent=fmt(U(state.x));$('keRead').textContent=fmt(k);$('eRead').textContent=fmt(state.E);let near=state.eqs.find(e=>Math.abs(e.x-state.x)<.015);$('eqStatus').textContent=near?`${near.kind[0].toUpperCase()+near.kind.slice(1)} equilibrium at x = ${fmt(near.x)} m`:' ';}
-function fitEnergyIfNeeded(){if(state.E>state.view.umax-.3){state.view.umax=state.E+Math.max(1,(state.view.umax-state.view.umin)*.10);$('umax').value=Number(state.view.umax.toFixed(2));}}
-function fit(){let lo=Infinity,hi=-Infinity;for(let i=0;i<=800;i++){let x=state.view.xmin+(state.view.xmax-state.view.xmin)*i/800;let val=U(x);if(Number.isFinite(val)){lo=Math.min(lo,val);hi=Math.max(hi,val);}}if(!Number.isFinite(lo)){lo=0;hi=10;}hi=Math.max(hi,state.E);const pad=Math.max(0.75,(hi-lo)*.12);state.view.umin=lo-pad;state.view.umax=hi+pad;$('umin').value=Number(state.view.umin.toFixed(2));$('umax').value=Number(state.view.umax.toFixed(2));draw();}
+function updateStats(){const k=.5*state.m*state.v*state.v;for(const [id,value] of [['xRead',state.x],['vRead',state.v],['aRead',state.acc],['uRead',U(state.x)],['keRead',k],['eRead',state.E]])setReading(id,value);let near=state.eqs.find(e=>Math.abs(e.x-state.x)<.015);$('eqStatus').textContent=near?`${near.kind[0].toUpperCase()+near.kind.slice(1)} equilibrium at x = ${fmt(near.x)} m`:' ';}
+function fitEnergyIfNeeded(){if(!state.uManual&&state.E>state.view.umax-.3)state.view.umax=state.E+Math.max(1,(state.view.umax-state.view.umin)*.10);}
+function fit(){let lo=Infinity,hi=-Infinity;for(let i=0;i<=800;i++){let x=state.view.xmin+(state.view.xmax-state.view.xmin)*i/800;let val=U(x);if(Number.isFinite(val)){lo=Math.min(lo,val);hi=Math.max(hi,val);}}if(!Number.isFinite(lo)){lo=0;hi=10;}hi=Math.max(hi,state.E);const pad=Math.max(0.75,(hi-lo)*.12);state.view.umin=lo-pad;state.view.umax=hi+pad;state.uManual=false;state.forceView=null;draw();}
 function refreshMode(){state.mode=$('buildMode').value;state.adding=false;$('pointTools').classList.toggle('hidden',state.mode!=='points');$('eqTools').classList.toggle('hidden',state.mode!=='equation');refreshAddButton();updateEquilibria();reset();}
 function refreshAddButton(){const b=$('addPoint');b.textContent=state.adding?'✓ Add points: ON':'＋ Add points: OFF';b.classList.toggle('on',state.adding);canvas.style.cursor=state.adding?'crosshair':'default';}
 function rounded(x,y,w,h,r,fill,stroke){c.beginPath();c.roundRect(x,y,w,h,r);if(fill){c.fillStyle=fill;c.fill();}if(stroke){c.strokeStyle=stroke;c.stroke();}}
@@ -528,12 +535,64 @@ function forceLabel(f){
  if(!Number.isFinite(f))return 'undefined';
  return Math.abs(f)>=1e4||(Math.abs(f)>0&&Math.abs(f)<.01)?f.toExponential(1):fmt(f);
 }
+function forceRange(){const {limit}=getForceProfile();return state.forceView||{min:-limit,max:limit};}
+const axisNames={xmin:'Position minimum (m)',xmax:'Position maximum (m)',umin:'Potential minimum (J)',umax:'Potential maximum (J)',fmin:'Force minimum (N)',fmax:'Force maximum (N)'};
+let axisEditing=null,axisTrigger=null;
+function axisLabel(value){return Math.abs(value)>=1e4||(value!==0&&Math.abs(value)<.01)?value.toExponential(1):String(Number(value.toPrecision(5)));}
+function axisValue(key){if(key==='fmin'||key==='fmax'){const range=forceRange();return key==='fmin'?range.min:range.max;}return state.view[key];}
+function createAxisLimits(){
+ for(const [container,height,low,high,top,bottom] of [['potentialPlot',618,'umin','umax',box.top,box.bottom],['forcePlotWrap',260,'fmin','fmax',38,208]]){
+  for(const [key,x,y,isY] of [[high,box.left-6,top,true],[low,box.left-6,bottom,true],['xmin',box.left,bottom+23,false],['xmax',box.right,bottom+23,false]]){
+   const button=document.createElement('button');button.type='button';button.className='axis-limit'+(isY?' y-limit':'');button.dataset.axis=key;
+   button.style.left=`${x/W*100}%`;button.style.top=`${y/height*100}%`;
+   button.addEventListener('click',()=>openAxisEditor(key,button));$(container).append(button);
+  }
+ }
+}
+function syncAxisLimits(){
+ for(const button of document.querySelectorAll('.axis-limit')){
+  if(button.closest('#forcePlotWrap')&&!$('showForcePlot').checked)continue;
+  const key=button.dataset.axis,value=axisValue(key);
+  button.textContent=axisLabel(value);button.title=`Edit ${axisNames[key].toLowerCase()}: ${value}`;
+  button.setAttribute('aria-label',button.title);button.setAttribute('aria-haspopup','dialog');
+ }
+ const auto=!state.forceView;$('autoForce').classList.toggle('on',auto);$('autoForce').setAttribute('aria-pressed',String(auto));
+}
+function closeAxisEditor(){
+ $('axisEditor').classList.add('hidden');axisEditing=null;
+ if(axisTrigger?.isConnected)axisTrigger.focus();
+}
+function openAxisEditor(key,button){
+ stop();axisEditing=key;axisTrigger=button;
+ $('axisEditLabel').textContent=axisNames[key];$('axisValue').value=axisValue(key);$('axisError').textContent='';$('axisValue').removeAttribute('aria-invalid');
+ const editor=$('axisEditor');editor.classList.remove('hidden');
+ const rect=button.getBoundingClientRect(),width=editor.offsetWidth,height=editor.offsetHeight;
+ editor.style.left=`${clamp(rect.left,8,innerWidth-width-8)}px`;
+ editor.style.top=`${rect.bottom+8+height<=innerHeight?rect.bottom+8:Math.max(8,rect.top-height-8)}px`;
+ $('axisValue').focus();$('axisValue').select();
+}
+function applyAxisLimit(key,value){
+ if(!Number.isFinite(value))throw Error('Enter a finite number.');
+ const isForce=key==='fmin'||key==='fmax',isX=key==='xmin'||key==='xmax';
+ const current=isForce?forceRange():state.view;
+ const minKey=isForce?'min':isX?'xmin':'umin',maxKey=isForce?'max':isX?'xmax':'umax';
+ const low=key.endsWith('min')?value:current[minKey],high=key.endsWith('max')?value:current[maxKey];
+ if(!Number.isFinite(high-low)||high-low<=Number.EPSILON*Math.max(1,Math.abs(low),Math.abs(high))*64)throw Error('The maximum must be greater than the minimum by a usable amount.');
+ if(isForce)state.forceView={min:low,max:high};
+ else{
+  state.view[key]=value;
+  if(isX){updateEquilibria();state.acc=F(state.x)/state.m;updateStats();}
+  else state.uManual=true;
+  if(state.pauseReason?.kind==='edge'&&!outsideView())state.pauseReason=null;
+ }
+ syncPlay();draw();
+}
 function drawForcePlot(){
  const visible=$('showForcePlot').checked;
  $('forcePanel').classList.toggle('hidden',!visible);
  if(!visible)return;
- const {samples,limit}=getForceProfile(),top=38,bottom=208,zero=(top+bottom)/2;
- const fy=f=>zero-f/limit*(bottom-top)/2,color='#8054bd';
+ const {samples}=getForceProfile(),range=forceRange(),top=38,bottom=208;
+ const fy=f=>bottom-(f-range.min)/(range.max-range.min)*(bottom-top),zero=fy(0),color='#8054bd';
  const segment=(x1,y1,x2,y2,stroke,width=1,dash=[])=>{
   fc.beginPath();fc.setLineDash(dash);fc.strokeStyle=stroke;fc.lineWidth=width;
   fc.moveTo(x1,y1);fc.lineTo(x2,y2);fc.stroke();fc.setLineDash([]);
@@ -541,18 +600,18 @@ function drawForcePlot(){
  fc.clearRect(0,0,W,260);fc.fillStyle='#fcfbfe';fc.fillRect(box.left,top,box.right-box.left,bottom-top);
  fc.font='700 15px system-ui';fc.fillStyle='#526882';
  for(let i=0;i<=4;i++){
-  const f=limit*(1-i/2),y=fy(f);
+  const f=range.max-(range.max-range.min)*i/4,y=fy(f);
   if($('showGrid').checked&&i!==2)segment(box.left,y,box.right,y,'#eee9f5');
   segment(box.left-5,y,box.left,y,'#9eacba');
-  fc.textAlign='right';fc.fillText(forceLabel(f),box.left-10,y+5);
+  if(i>0&&i<4){fc.textAlign='right';fc.fillText(forceLabel(f),box.left-10,y+5);}
  }
  for(let i=0;i<=10;i++){
   const x=state.view.xmin+(state.view.xmax-state.view.xmin)*i/10,sx=projectX(x);
   if($('showGrid').checked)segment(sx,top,sx,bottom,'#eee9f5');
   segment(sx,bottom,sx,bottom+5,'#9eacba');
-  fc.textAlign='center';fc.fillText(Number(x.toFixed(2)).toString(),sx,bottom+23);
+  if(i>0&&i<10){fc.textAlign='center';fc.fillText(axisLabel(x),sx,bottom+23);}
  }
- segment(box.left,zero,box.right,zero,'#a99abf',1.6);
+ if(zero>=top&&zero<=bottom)segment(box.left,zero,box.right,zero,'#a99abf',1.6);
  segment(box.left,top,box.left,bottom,'#6c7e93',1.6);
  segment(box.left,bottom,box.right,bottom,'#6c7e93',1.6);
  fc.textAlign='left';fc.font='800 20px system-ui';fc.fillStyle='#68449f';
@@ -585,7 +644,7 @@ if($('showGrid').checked)grid();
 drawEquilibriumGuides();
 text('POTENTIAL ENERGY',box.left,36,19,'#425c7a',850);text('U (J)',box.left-63,box.top-13,20,'#1e2f47',800);text('x (m)',box.right+8,box.bottom+6,20,'#1e2f47',800);
 line(box.left,box.top,box.left,box.bottom,'#6c7e93',1.6);line(box.left,box.bottom,box.right,box.bottom,'#6c7e93',1.6);
-c.save();c.font='700 15px system-ui';c.fillStyle='#526882';c.textAlign='center';for(let i=0;i<=10;i++){let x=state.view.xmin+(state.view.xmax-state.view.xmin)*i/10;let sx=projectX(x);line(sx,box.bottom,sx,box.bottom+5,'#9eacba');c.fillText(Number(x.toFixed(2)).toString(),sx,box.bottom+19);}c.textAlign='right';for(let i=0;i<=5;i++){const u=state.view.umin+(state.view.umax-state.view.umin)*i/5,y=projectY(u);line(box.left-5,y,box.left,y,'#9eacba');c.fillText(Number(u.toFixed(1)).toString(),box.left-10,y+4);}c.restore();
+c.save();c.font='700 15px system-ui';c.fillStyle='#526882';c.textAlign='center';for(let i=0;i<=10;i++){let x=state.view.xmin+(state.view.xmax-state.view.xmin)*i/10;let sx=projectX(x);line(sx,box.bottom,sx,box.bottom+5,'#9eacba');if(i>0&&i<10)c.fillText(axisLabel(x),sx,box.bottom+19);}c.textAlign='right';for(let i=0;i<=5;i++){const u=state.view.umin+(state.view.umax-state.view.umin)*i/5,y=projectY(u);line(box.left-5,y,box.left,y,'#9eacba');if(i>0&&i<5)c.fillText(axisLabel(u),box.left-10,y+4);}c.restore();
 const px=projectX(state.x),pu=projectY(U(state.x));
 // Total E and vertical KE segment
 const eY=projectY(state.E);if($('showEnergy').checked&&Number.isFinite(eY)){line(box.left,eY,box.right,eY,'#0a9061',2.8,[11,6]);text('E',box.right-20,Math.max(box.top+17,eY-10),22,'#008252',850);}
@@ -642,6 +701,7 @@ if($('showForce').checked){let f=F(state.x),L=Math.min(94,Math.abs(f)*7),d=Math.
 if(state.nudge){const n=state.nudge;drawHand(projectX(n.startX),by,n.dir,nudgeProgress(n.age),17);}
 c.restore();
 drawForcePlot();
+syncAxisLimits();
 }
 function pointerPos(e){const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height};}
 function hitPoint(x,y){if(state.mode!=='points')return null;let target=null,best=14**2;for(const p of state.points){const d=(x-projectX(p.x))**2+(y-projectY(p.u))**2;if(d<best){best=d;target=p;}}return target;}
@@ -663,6 +723,7 @@ function validNudgeEnergy(){
 }
 function nudge(dir){
  if(state.nudge)return;
+ if(state.pauseReason?.kind==='precision')return;
  const amount=validNudgeEnergy();
  if(amount===null){msg('Enter a positive nudge energy (at least 0.01 J).');return;}
  stop();state.nudge={dir,amount,age:0,impacted:false,startX:state.x,startU:U(state.x)};syncPlay();requestAnimationFrame(frame);
@@ -672,11 +733,26 @@ function impact(n){const k=.5*state.m*state.v*state.v+n.amount;state.v=n.dir*Mat
 // Graph x-limits are VIEWPORT boundaries, not reflecting walls. Motion is
 // allowed beyond either edge; only U(x) > E can cause a physical turning point.
 function advance(h){
+ if($('pauseOutside').checked&&outsideView()){
+  pauseMotion('edge','The particle is outside the view. Expand the position limits or continue outside the view.');return;
+ }
  const old=state.x,prevV=state.v,a0=F(old)/state.m;
- const cand=old+prevV*h+.5*a0*h*h,vPredict=prevV+a0*h;
- if(!Number.isFinite(cand)){stop();msg('Motion exceeded the numerical range. Reset to begin again.');return;}
+ let cand=old+prevV*h+.5*a0*h*h;
+ const vPredict=prevV+a0*h;
+ if(!Number.isFinite(cand)){pauseMotion('precision','Motion exceeded the numerical range. Reset to begin again.');return;}
+ let reachedEdge=null;
+ if($('pauseOutside').checked){
+  if(cand>state.view.xmax){cand=state.view.xmax;reachedEdge='right';}
+  else if(cand<state.view.xmin){cand=state.view.xmin;reachedEdge='left';}
+ }
  const u=U(cand);
- if(!Number.isFinite(u)){stop();msg('Potential is not defined beyond this position.');return;}
+ if(!Number.isFinite(u)){pauseMotion('precision','Potential is not defined at the next position. Reset or change the equation.');return;}
+ // Stop before subtracting large opposing U and KE values loses the total
+ // energy to round-off. Allow one part per million relative to max(1 J, |E|).
+ const energyScale=Math.max(1,Math.abs(state.E)),k=state.E-u;
+ if(u<=state.E&&(!Number.isFinite(k)||Number.EPSILON*8*Math.max(Math.abs(u),Math.abs(k))>energyScale*1e-6)){
+  pauseMotion('precision','The energies are too large to resolve total energy reliably. Reset or choose a less extreme starting position.');return;
+ }
  if(u>state.E+1e-8){
    // A real turning point: find U(x) = E between the last accessible position
    // and the proposed one. Reverse ONLY here, never at the graph border.
@@ -686,6 +762,7 @@ function advance(h){
    state.x=a;
    state.v=-Math.sign(cand-old)*Math.sqrt(Math.max(0,2*(state.E-U(a))/state.m));
    if(!Number.isFinite(state.v))state.v=0;
+   reachedEdge=null;
  }else{
    state.x=cand;
    const a1=F(state.x)/state.m;
@@ -695,13 +772,27 @@ function advance(h){
  }
  state.acc=F(state.x)/state.m;
  if(!Number.isFinite(state.acc)||!Number.isFinite(state.v)){
-   stop();msg('The motion could not be calculated at this position.');
+   pauseMotion('precision','The motion could not be calculated reliably at this position. Reset or change the equation.');return;
  }
+ if(reachedEdge)pauseMotion('edge',`The particle reached the ${reachedEdge} edge of the view. Its velocity is preserved. Expand the position limits or continue outside the view.`);
 }
 let nextAnim=false;function frame(ts){if(nextAnim)return;nextAnim=true;try{if(state.t0===null)state.t0=ts;let dt=Math.min(.045,Math.max(0,(ts-state.t0)/1000));state.t0=ts;let doMore=false;if(state.nudge){const n=state.nudge;n.age+=dt/.65;if(!n.impacted&&n.age>=.38){n.impacted=true;impact(n);}if(n.age>=1)state.nudge=null;else doMore=true;}
 if(state.playing){let remain=dt*num('speed',1);let guard=0;while(remain>1e-8&&guard++<80){const h=Math.min(.0075,remain);advance(h);remain-=h;if(!state.playing)break;}doMore=state.playing||doMore;updateStats();}syncPlay();draw();if(doMore)requestAnimationFrame(frame);}finally{nextAnim=false;}}
 function startAnimation(){state.t0=null;requestAnimationFrame(frame);}
-$('play').addEventListener('click',()=>{if(state.nudge)return;state.playing=!state.playing;state.t0=null;syncPlay();if(state.playing)startAnimation();else draw();});
+function play(){
+ if(state.nudge||state.pauseReason?.kind==='precision')return;
+ if(state.playing){stop();draw();return;}
+ if($('pauseOutside').checked&&(outsideView()||state.pauseReason?.kind==='edge')){
+  pauseMotion('edge','Expand the position limits or choose Continue outside view to resume motion.');draw();return;
+ }
+ state.pauseReason=null;state.playing=true;state.t0=null;syncPlay();startAnimation();
+}
+$('play').addEventListener('click',play);
+$('continueOutside').addEventListener('click',()=>{$('pauseOutside').checked=false;state.pauseReason=null;play();});
+$('pauseOutside').addEventListener('change',()=>{
+ if(!$('pauseOutside').checked&&state.pauseReason?.kind==='edge')state.pauseReason=null;
+ syncPlay();
+});
 $('reset').addEventListener('click',reset);
 $('addPoint').addEventListener('click',()=>{state.adding=!state.adding;refreshAddButton();msg(state.adding?'Click the plot to create points; drag any point to adjust it.':'Point creation turned off.');});
 $('deletePoint').addEventListener('click',()=>{if(!state.selected){msg('Select a registration point first.');return;}state.points=state.points.filter(p=>p!==state.selected);state.selected=null;invalidate();updateEquilibria();reset();});
@@ -717,11 +808,19 @@ $('snapNearest').addEventListener('click',()=>{if(!state.eqs.length){msg('No iso
 for(const id of ['x0','initialKE','mass','direction'])$(id).addEventListener('change',()=>{stop();reset();});
 $('speed').addEventListener('change',()=>{state.t0=null;});
 for(const id of ['showMarble','showEnergy','showForcePlot','showForce','showKE','showEquilibria','showGrid'])$(id).addEventListener('change',draw);
-function applyRanges(){let xmin=num('xmin',0),xmax=num('xmax',10),umin=num('umin',-1),umax=num('umax',11);if(xmax-xmin<.5||umax-umin<.5){msg('The displayed x and U ranges must each span at least 0.5.');return;}state.view={xmin,xmax,umin,umax};updateEquilibria();reset();}
-$('toggleRange').addEventListener('click',()=>{const editor=$('rangeEditor'),opening=editor.classList.contains('hidden');editor.classList.toggle('hidden',!opening);$('toggleRange').setAttribute('aria-expanded',String(opening));});
-$('applyAxes').addEventListener('click',applyRanges);$('fitAxes').addEventListener('click',fit);$('fitTop').addEventListener('click',fit);
+$('axisEditor').addEventListener('submit',event=>{
+ event.preventDefault();if(!axisEditing)return;
+ try{const raw=$('axisValue').value;if(raw.trim()==='')throw Error('Enter a number.');applyAxisLimit(axisEditing,Number(raw));closeAxisEditor();}
+ catch(error){$('axisError').textContent=error.message;$('axisValue').setAttribute('aria-invalid','true');$('axisValue').focus();}
+});
+$('cancelAxis').addEventListener('click',closeAxisEditor);
+$('axisEditor').addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();closeAxisEditor();}});
+document.addEventListener('pointerdown',event=>{if(axisEditing&&!$('axisEditor').contains(event.target)&&!event.target.closest('.axis-limit'))closeAxisEditor();});
+window.addEventListener('resize',()=>{if(axisEditing)closeAxisEditor();});
+$('autoForce').addEventListener('click',()=>{state.forceView=null;draw();});
+$('fitTop').addEventListener('click',fit);
 // Initialize
-state.points=sample.map(p=>({...p}));sortPts();invalidate();updateEquilibria();setAt(num('x0',1.2),0);syncPlay();validNudgeEnergy();draw();
+createAxisLimits();state.points=sample.map(p=>({...p}));sortPts();invalidate();updateEquilibria();setAt(num('x0',1.2),0);syncPlay();validNudgeEnergy();draw();
 })();
 </script>
 <script data-goatcounter="https://phys-viz.goatcounter.com/count"
