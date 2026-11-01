@@ -141,7 +141,7 @@ main {padding:10px}
 .force-heading output{font-weight:750;font-variant-numeric:tabular-nums}
 .force-panel canvas{display:block;width:100%;height:auto}
 .axis-plot{position:relative}
-.axis-limit{position:absolute;transform:translate(-50%,-50%);padding:2px 4px;border:0;border-bottom:1px dotted #7b98bd;border-radius:3px;background:#fff;color:#365e90;font:700 clamp(11px,1.05vw,15px)/1.1 system-ui;min-height:24px;white-space:nowrap;cursor:text}
+.axis-limit{position:absolute;transform:translate(-50%,-50%);padding:2px 4px;border:1px solid #c7d9ee;border-radius:5px;background:#f8fbff;color:#365e90;font:700 clamp(11px,1.05vw,15px)/1.1 system-ui;min-height:24px;white-space:nowrap;cursor:text;box-shadow:none}
 .axis-limit.y-limit{transform:translate(-100%,-50%)}
 .axis-limit[data-axis="xmin"]{transform:translate(0,-50%)}
 .axis-limit[data-axis="xmax"]{transform:translate(-100%,-50%)}
@@ -159,7 +159,7 @@ main {padding:10px}
 .stat .number.scientific{font-size:clamp(16px,1.6vw,22px);letter-spacing:-.4px}
 .scientific .times{font-size:.65em;margin:0 1px}
 .scientific sup{font-size:.6em;vertical-align:super;letter-spacing:0}
-.axis-editor{position:fixed;z-index:10;width:260px;max-width:calc(100vw - 16px);padding:12px;background:#fff;border:1px solid #b9cee9;border-radius:10px;box-shadow:0 10px 35px #18263a30}
+.axis-editor{position:fixed;z-index:10;width:260px;max-width:calc(100vw - 16px);padding:12px;background:#fff;border:1px solid #b9cee9;border-radius:10px}
 .axis-editor label{display:block;font-size:14px;font-weight:750;margin-bottom:7px;color:#365e90}
 .axis-editor input{width:100%;padding:8px;font:inherit;border:1px solid #b9cee9;border-radius:6px}
 .axis-editor .btnrow{justify-content:flex-end}
@@ -171,20 +171,75 @@ main {padding:10px}
  .axis-limit.y-limit{transform:translate(0,0);min-height:20px;padding:1px 3px;font-size:11px}
  .axis-limit[data-axis="umin"],.axis-limit[data-axis="fmin"]{transform:translate(0,calc(-100% - 7px))}
 }
+/* Controls, graphs and live measurements each have their own column. */
+.shell{max-width:1840px}
+.layout{display:grid;grid-template-columns:320px minmax(0,1fr) 176px;gap:12px;align-items:start}
+.control-panel,.readout-panel{position:sticky;top:12px;max-height:calc(100vh - 70px);overflow-y:auto}
+.control-panel .display-group{--sec:#516489;--sec-bg:#edf2fa;border-left:3px solid #8196bd;margin-top:0;background:#fff}
+.control-panel .display-strip-row{display:block}
+.control-panel .display-strip h2{margin:-2px -2px 8px;font-size:16px}
+.control-panel .display-strip .options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 6px;overflow:visible;padding:2px 0}
+.control-panel .display-strip .option{font-size:12.5px;font-weight:650;gap:5px;margin:0!important}
+.control-panel .playback-options{margin-top:8px;padding-top:8px;border-top:1px solid #e6edf5}
+.control-panel .playback-options .option{font-size:12.5px}
+.control-panel textarea.eqbox{display:block;height:auto;min-height:78px;resize:vertical;line-height:1.45;font-size:14px;white-space:pre-wrap}
+.control-panel .nudge-control-row{grid-template-columns:70px minmax(0,1fr)}
+.control-panel .nudge-control-row .btn.nudge{font-size:13.5px}
+.readout-panel{padding:10px}
+.sidebar-title{margin:0 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:#4b6180}
+.readout-panel .statbar{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;margin:0}
+.readout-panel .stat{min-height:75px;padding:9px 5px}
+.readout-panel .stat .name{font-size:13px}
+.readout-panel .stat .number{font-size:26px}
+.readout-panel .stat .number.scientific{font-size:20px}
+.readout-panel .stat .unit{font-size:13px}
+.readout-panel .status{display:block;margin-top:9px;font-size:12px;line-height:1.4}
+.readout-panel #eqStatus{display:block;margin-top:5px}
+.readout-panel .motion-note{font-size:12px}
+.readout-panel .motion-note .btn{width:100%;font-size:12px}
+@media(max-width:1200px){
+ .layout{grid-template-columns:290px minmax(0,1fr) 155px;gap:9px}
+ .control-panel .display-strip .options{grid-template-columns:minmax(0,1fr)}
+ .readout-panel .stat .number{font-size:23px}
+ .axis-limit{font-size:11px}
+ .axis-limit.y-limit{transform:translate(0,0);min-height:20px;padding:1px 3px}
+ .axis-limit[data-axis="umin"],.axis-limit[data-axis="fmin"]{transform:translate(0,calc(-100% - 7px))}
+}
+@media(max-width:960px){
+ .layout{grid-template-columns:280px minmax(0,1fr)}
+ .readout-panel{grid-column:2;position:static;max-height:none}
+ .readout-panel .statbar{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .control-panel{grid-row:1 / span 2}
+}
+@media(max-width:760px){
+ .layout{display:flex;flex-direction:column}
+ .control-panel,.readout-panel{position:static;max-height:none;width:100%}
+ .layout main{order:0;width:100%}
+ .readout-panel{order:1}
+ .control-panel{order:2}
+ .readout-panel .statbar{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .control-panel .display-strip .options{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .readout-panel .stat .name{font-size:12px}
+ .readout-panel .stat .number{font-size:22px}
+ .readout-panel .stat .number.scientific{font-size:16px}
+ .axis-limit:not(.y-limit){min-height:18px;padding:1px 3px;font-size:10px}
+ #forcePlotWrap .axis-limit:not(.y-limit){top:87%!important}
+}
 </style>
 </head>
 <body>
 <div class="shell">
 <header class="heading"><h1>Potential Energy Explorer</h1></header>
 <div class="layout">
-<aside class="panel">
+<aside class="panel control-panel" aria-label="Simulation controls">
 <section class="group build-group"><h2>Build the Potential</h2>
- <div class="field"><label for="buildMode">Curve definition</label><select id="buildMode"><option value="points">Registration points</option><option value="equation">Enter an equation</option></select></div>
- <div id="pointTools">
+ <div class="field"><label for="buildMode">Curve definition</label><select id="buildMode"><option value="equation" selected>Enter an equation</option><option value="points">Registration points</option></select></div>
+ <div id="pointTools" class="hidden">
   <div class="btnrow"><button class="btn" id="addPoint">＋ Add points: OFF</button><button class="btn" id="deletePoint" title="Select a point to delete it">Delete point</button></div>
   <div class="btnrow"><button class="btn" id="sampleCurve">↺ Sample curve</button><button class="btn" id="clearCurve">Clear</button></div>
  </div>
- <div id="eqTools" class="hidden"><div class="eq"><label class="field-label" for="equation">U(x) in joules</label><input class="eqbox" id="equation" spellcheck="false" value="0.12*(x-2)^2*(x-7)^2+1" aria-describedby="equationError" /></div><div id="equationError" class="hint hint-error hidden" role="alert"></div><div class="btnrow"><button id="applyEquation" class="btn primary">Plot equation</button></div></div>
+ <div id="eqTools"><div class="eq"><label class="field-label" for="equation">U(x) in joules</label><textarea class="eqbox" id="equation" rows="3" spellcheck="false" aria-describedby="equationError">0.22*(x-5.04)^2+0.21*(x-5.04)
++2.84+2.61*cos(1.1*(x-5.04))</textarea></div><div id="equationError" class="hint hint-error hidden" role="alert"></div><div class="btnrow"><button id="applyEquation" class="btn primary">Plot equation</button></div></div>
 </section>
 <section class="group initial-group"><h2>Initial Conditions</h2>
  <div class="fields three">
@@ -208,15 +263,7 @@ main {padding:10px}
  <span id="deltaEHelp" class="hint hint-error hidden" role="alert">Nudge energy must be greater than zero (minimum 0.01 J).</span>
 </section>
 
-</aside>
-<main class="panel">
- <div class="topbar"><div class="legend"><span><i class="lineicon"></i> U(x)</span><span><i class="lineicon energy"></i> E</span><span><i class="lineicon link"></i> Same position</span></div><div class="top-actions"><span class="axis-hint">Click an axis limit to edit</span><button class="btn" id="fitTop" title="Fit potential and energy, and restore automatic force scaling">⤢ Fit view</button></div></div>
- <div class="plot-wrap axis-plot" id="potentialPlot"><canvas id="plot" width="1100" height="618" aria-label="Potential energy graph with a marble on the curve and an aligned block on the x-axis"></canvas></div>
- <section id="forcePanel" class="force-panel hidden" aria-label="Force versus position">
-  <div class="force-heading"><h2>Force · Fₓ = −dU/dx</h2><div class="force-tools"><output id="forceRead" aria-live="off"></output><button type="button" class="btn on" id="autoForce" aria-pressed="true" title="Automatically fit the force scale">Auto scale</button></div></div>
-  <div class="axis-plot" id="forcePlotWrap"><canvas id="forcePlot" width="1100" height="260" role="img" aria-label="Force versus position, aligned with the potential energy graph"></canvas></div>
- </section>
- <section class="display-strip" aria-label="Display controls">
+ <section class="group display-strip display-group" aria-label="Display controls">
   <div class="display-strip-row">
     <h2>Display</h2>
     <div class="options">
@@ -229,9 +276,22 @@ main {padding:10px}
       <label class="option"><input type="checkbox" id="showGrid"> Grid</label>
     </div>
   </div>
+ <div class="playback-options"><label class="option"><input type="checkbox" id="pauseOutside" checked> Pause outside view</label></div>
   <div id="notice" class="msg" role="status"></div>
  </section>
- <div class="playback-options"><label class="option"><input type="checkbox" id="pauseOutside" checked> Pause outside view</label></div>
+</aside>
+<main class="panel">
+ <div class="topbar"><div class="legend"><span><i class="lineicon"></i> U(x)</span><span><i class="lineicon energy"></i> E</span><span><i class="lineicon link"></i> Same position</span></div><div class="top-actions"><span class="axis-hint">Click an axis limit to edit</span><button class="btn" id="fitTop" title="Fit potential and energy, and restore automatic force scaling">⤢ Fit view</button></div></div>
+ <div class="plot-wrap axis-plot" id="potentialPlot"><canvas id="plot" width="1100" height="618" aria-label="Potential energy graph with a marble on the curve and an aligned block on the x-axis"></canvas></div>
+ <section id="forcePanel" class="force-panel hidden" aria-label="Force versus position">
+  <div class="force-heading"><h2>Force · Fₓ = −dU/dx</h2><div class="force-tools"><output id="forceRead" aria-live="off"></output><button type="button" class="btn on" id="autoForce" aria-pressed="true" title="Automatically fit the force scale">Auto scale</button></div></div>
+  <div class="axis-plot" id="forcePlotWrap"><canvas id="forcePlot" width="1100" height="260" role="img" aria-label="Force versus position, aligned with the potential energy graph"></canvas></div>
+ </section>
+
+
+</main>
+<aside class="panel readout-panel" aria-label="Live measurements">
+ <h2 class="sidebar-title">Live measurements</h2>
  <div id="motionNote" class="motion-note hidden" role="status"><div id="motionText"></div><button type="button" class="btn" id="continueOutside">Continue outside view</button></div>
  <div class="status"><span id="statusText">Paused</span><span id="eqStatus">—</span></div>
  <div class="statbar">
@@ -242,7 +302,7 @@ main {padding:10px}
   <div class="stat"><div class="name">Kinetic, KE</div><div class="reading"><span id="keRead" class="number">0.00</span><span class="unit">J</span></div></div>
   <div class="stat"><div class="name">Total, E</div><div class="reading"><span id="eRead" class="number energytext">0.00</span><span class="unit">J</span></div></div>
  </div>
-</main>
+</aside>
 </div></div>
 <form id="axisEditor" class="axis-editor hidden" role="dialog" aria-labelledby="axisEditLabel">
  <label id="axisEditLabel" for="axisValue">Axis limit</label>
@@ -538,7 +598,7 @@ function forceLabel(f){
 function forceRange(){const {limit}=getForceProfile();return state.forceView||{min:-limit,max:limit};}
 const axisNames={xmin:'Position minimum (m)',xmax:'Position maximum (m)',umin:'Potential minimum (J)',umax:'Potential maximum (J)',fmin:'Force minimum (N)',fmax:'Force maximum (N)'};
 let axisEditing=null,axisTrigger=null;
-function axisLabel(value){return Math.abs(value)>=1e4||(value!==0&&Math.abs(value)<.01)?value.toExponential(1):String(Number(value.toPrecision(5)));}
+function axisLabel(value){return Math.abs(value)>=1e4||(value!==0&&Math.abs(value)<.01)?value.toExponential(1).replace('.0e','e').replace('e+','e'):String(Number(value.toFixed(2)));}
 function axisValue(key){if(key==='fmin'||key==='fmax'){const range=forceRange();return key==='fmin'?range.min:range.max;}return state.view[key];}
 function createAxisLimits(){
  for(const [container,height,low,high,top,bottom] of [['potentialPlot',618,'umin','umax',box.top,box.bottom],['forcePlotWrap',260,'fmin','fmax',38,208]]){
@@ -820,7 +880,7 @@ window.addEventListener('resize',()=>{if(axisEditing)closeAxisEditor();});
 $('autoForce').addEventListener('click',()=>{state.forceView=null;draw();});
 $('fitTop').addEventListener('click',fit);
 // Initialize
-createAxisLimits();state.points=sample.map(p=>({...p}));sortPts();invalidate();updateEquilibria();setAt(num('x0',1.2),0);syncPlay();validNudgeEnergy();draw();
+createAxisLimits();state.points=sample.map(p=>({...p}));sortPts();invalidate();state.mode='equation';state.expression=$('equation').value;state.eqFn=compile(state.expression);updateEquilibria();setAt(num('x0',1.2),0);syncPlay();validNudgeEnergy();fit();
 })();
 </script>
 <script data-goatcounter="https://phys-viz.goatcounter.com/count"

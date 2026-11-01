@@ -39,3 +39,15 @@ test('malformed and undefined equations are rejected with usable errors', () => 
     assert.throws(() => compile(equation), /equation|Expected|Unexpected|Unrecognized|Use only/, equation);
   }
 });
+
+test('the default equation resembles the original registration-point curve', () => {
+  const expression = html.match(/<textarea[^>]*id="equation"[^>]*>([\s\S]*?)<\/textarea>/)[1];
+  const potential = compile(expression);
+  for (const [x, original] of [[.18, 8.7], [1.2, 4.1], [2.35, 1.05], [5.12, 5.55], [7.35, 2.36], [9.7, 9.4]]) {
+    assert.ok(Math.abs(potential(x) - original) < .3, `curve height at x=${x}`);
+  }
+  // Preserve both wells and the central barrier in the equation approximation.
+  assert.ok(potential(2.48) < potential(2.3) && potential(2.48) < potential(2.7));
+  assert.ok(potential(5.12) > potential(4.9) && potential(5.12) > potential(5.4));
+  assert.ok(potential(7.48) < potential(7.2) && potential(7.48) < potential(7.7));
+});
