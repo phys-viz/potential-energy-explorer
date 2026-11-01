@@ -198,6 +198,7 @@ main {padding:10px}
 .readout-panel #eqStatus{display:block;margin-top:5px}
 .readout-panel .motion-note{font-size:12px}
 .readout-panel .motion-note .btn{width:100%;font-size:12px}
+.initial-group .msg{background:#eef5ff;color:#365e90;line-height:1.4}
 @media(max-width:1200px){
  .layout{grid-template-columns:290px minmax(0,1fr) 155px;gap:9px}
  .readout-panel .stat .number{font-size:23px}
@@ -244,8 +245,8 @@ main {padding:10px}
 <section class="group initial-group"><h2>Initial Conditions</h2>
  <div class="fields three">
   <div class="field"><label for="x0">x₀ (m)</label><input type="number" id="x0" value="1.20" step="0.1"></div>
-  <div class="field"><label for="initialKE">KE₀ (J)</label><input type="number" id="initialKE" value="0" min="0" step="0.1"></div>
-  <div class="field"><label for="mass">m (kg)</label><input type="number" id="mass" value="1" min="0.01" step="0.1"></div>
+  <div class="field"><label for="initialKE">KE₀ (J)</label><input type="number" id="initialKE" value="0" min="0" step="0.1" title="Initial kinetic energy must be zero or greater."></div>
+  <div class="field"><label for="mass">m (kg)</label><input type="number" id="mass" value="1" min="0.01" step="0.1" title="Mass must be at least 0.01 kg."></div>
  </div>
  <div class="fields" style="margin-top:8px">
   <div class="field"><label for="direction">Initial velocity</label><select id="direction"><option value="1">→ Right</option><option value="-1">← Left</option></select></div>
@@ -253,6 +254,7 @@ main {padding:10px}
  </div>
  <div class="btnrow"><button id="play" class="btn primary">▶ Play</button><button id="reset" class="btn">↺ Reset</button></div>
  <div class="btnrow snap-row"><button id="snapNearest" class="btn highlight">◎ Snap to nearest equilibrium</button></div>
+ <div id="initialNotice" class="msg" role="status"></div>
 </section>
 <section class="group nudge-group"><h2>Nudge</h2>
  <div class="nudge-control-row">
@@ -467,8 +469,27 @@ function syncPlay(){
 }
 function stop(){state.playing=false;state.t0=null;state.stepRemainder=0;syncPlay();}
 function pauseMotion(kind,text){state.pauseReason={kind,text};stop();}
-function setAt(x,ke){state.pauseReason=null;state.x=clamp(x,state.view.xmin,state.view.xmax);let K=Math.max(0,ke),dir=num('direction',1);state.m=Math.max(.01,num('mass',1));state.v=dir*Math.sqrt(2*K/state.m);state.acc=F(state.x)/state.m;state.E=U(state.x)+K;state.referenceE=state.E;state.energyScale=Math.max(1,Math.abs(state.referenceE));state.simTime=0;state.stepRemainder=0;syncPlay();updateStats();}
-function reset(){state.nudge=null;stop();setAt(num('x0',1.2),num('initialKE',0));fitEnergyIfNeeded();draw();}
+function setAt(x,ke){
+ const corrections=[],{xmin,xmax}=state.view;
+ state.pauseReason=null;
+ state.x=clamp(Number.isFinite(x)?x:state.x,xmin,xmax);
+ const K=Math.max(0,Number.isFinite(ke)?ke:0),dir=num('direction',1);
+ const rawMass=$('mass').value,requestedMass=rawMass.trim()===''?NaN:Number(rawMass);
+ state.m=Number.isFinite(requestedMass)?Math.max(.01,requestedMass):1;
+ if(!Number.isFinite(x)||state.x!==x){
+  $('x0').value=state.x;
+  corrections.push(`x₀ must be between ${xmin} and ${xmax} m. Set to ${state.x} m.`);
+ }
+ if(!Number.isFinite(ke)||K!==ke){
+  $('initialKE').value=K;corrections.push('KE₀ must be zero or greater. Set to 0 J.');
+ }
+ if(!Number.isFinite(requestedMass)||state.m!==requestedMass){
+  $('mass').value=state.m;corrections.push(`Mass must be at least 0.01 kg. Set to ${state.m} kg.`);
+ }
+ $('initialNotice').textContent=corrections.join(' ');$('initialNotice').classList.toggle('show',corrections.length>0);
+ state.v=dir*Math.sqrt(2*K/state.m);state.acc=F(state.x)/state.m;state.E=U(state.x)+K;state.referenceE=state.E;state.energyScale=Math.max(1,Math.abs(state.referenceE));state.simTime=0;state.stepRemainder=0;syncPlay();updateStats();
+}
+function reset(){state.nudge=null;stop();const read=id=>$(id).value.trim()===''?NaN:Number($(id).value);setAt(read('x0'),read('initialKE'));fitEnergyIfNeeded();draw();}
 function updateStats(){
  const k=.5*state.m*state.v*state.v;
  for(const [id,value] of [['xRead',state.x],['vRead',state.v],['aRead',state.acc],['uRead',U(state.x)],['keRead',k],['eRead',state.E]])setReading(id,value);
@@ -636,6 +657,8 @@ function createAxisLimits(){
  }
 }
 function syncAxisLimits(){
+ $('x0').min=state.view.xmin;$('x0').max=state.view.xmax;
+ $('x0').title=`Initial position must be between ${state.view.xmin} and ${state.view.xmax} m.`;
  for(const button of document.querySelectorAll('.axis-limit')){
   if(button.closest('#forcePlotWrap')&&!$('showForcePlot').checked)continue;
   const key=button.dataset.axis,value=axisValue(key);
