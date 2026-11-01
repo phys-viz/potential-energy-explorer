@@ -177,10 +177,12 @@ main {padding:10px}
 .control-panel .display-strip-row{display:block}
 .control-panel .display-strip h2{margin:-2px -2px 8px;font-size:16px}
 .control-panel .display-strip .options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 6px;overflow:visible;padding:2px 0}
-.control-panel .display-strip .option{font-size:12.5px;font-weight:650;gap:5px;margin:0!important}
-.control-panel .display-strip .option.wide{grid-column:1 / -1}
+.control-panel .display-strip .option{font-size:12.5px;font-weight:650;gap:5px;margin:0!important;white-space:normal;align-items:flex-start;line-height:1.3}
+.control-panel .display-strip .option input{flex:none;margin-top:2px}
+.control-panel .display-strip .pause-option{grid-column:2;grid-row:4}
 .control-panel .group h2{position:relative;justify-content:center;text-align:center}
 .control-panel .group h2::before{position:absolute;left:10px}
+.control-panel .field label,.control-panel .field-label{display:block;text-align:center}
 .control-panel textarea.eqbox{display:block;height:auto;min-height:78px;resize:vertical;line-height:1.45;font-size:14px;white-space:pre-wrap}
 .control-panel .nudge-control-row{grid-template-columns:70px minmax(0,1fr)}
 .control-panel .nudge-control-row .btn.nudge{font-size:13.5px}
@@ -188,7 +190,10 @@ main {padding:10px}
 .sidebar-title{margin:0 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:#4b6180;text-align:center}
 .readout-panel .statbar{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;margin:0}
 .readout-panel .stat{min-height:75px;padding:9px 5px}
-.readout-panel .stat .name{font-size:13px}
+.readout-panel .stat .name{font-size:13px;width:100%;text-align:center}
+.energy-monitor{margin-top:9px;padding:8px 3px;border-top:1px solid #e3eaf2;text-align:center;color:#60748e;font-size:11.5px;line-height:1.45;font-variant-numeric:tabular-nums}
+.energy-monitor output{display:block;overflow-wrap:anywhere}
+.energy-monitor.warning{color:#9b5c0b}
 .readout-panel .stat .number{font-size:26px}
 .readout-panel .stat .number.scientific{font-size:20px}
 .readout-panel .stat .unit{font-size:13px}
@@ -198,7 +203,6 @@ main {padding:10px}
 .readout-panel .motion-note .btn{width:100%;font-size:12px}
 @media(max-width:1200px){
  .layout{grid-template-columns:290px minmax(0,1fr) 155px;gap:9px}
- .control-panel .display-strip .options{grid-template-columns:minmax(0,1fr)}
  .readout-panel .stat .number{font-size:23px}
  .axis-limit{font-size:11px}
  .axis-limit.y-limit{transform:translate(0,0);min-height:20px;padding:1px 3px}
@@ -272,7 +276,7 @@ main {padding:10px}
       <label class="option"><input type="checkbox" id="showKE"> KE</label>
       <label class="option"><input type="checkbox" id="showEquilibria"> Equilibria</label>
       <label class="option"><input type="checkbox" id="showGrid"> Grid</label>
-      <label class="option wide"><input type="checkbox" id="pauseOutside" checked> Pause outside view</label>
+      <label class="option pause-option"><input type="checkbox" id="pauseOutside" checked> Pause outside view</label>
     </div>
   </div>
   <div id="notice" class="msg" role="status"></div>
@@ -300,6 +304,7 @@ main {padding:10px}
   <div class="stat"><div class="name">Kinetic, KE</div><div class="reading"><span id="keRead" class="number">0.00</span><span class="unit">J</span></div></div>
   <div class="stat"><div class="name">Total, E</div><div class="reading"><span id="eRead" class="number energytext">0.00</span><span class="unit">J</span></div></div>
  </div>
+ <div class="energy-monitor" id="energyMonitor" title="Difference between the calculated total energy and its value at reset, accounting for energy added by nudges."><span>Energy drift</span><output id="energyDrift">0.00 J</output></div>
 </aside>
 </div></div>
 <form id="axisEditor" class="axis-editor hidden" role="dialog" aria-labelledby="axisEditLabel">
@@ -313,9 +318,10 @@ main {padding:10px}
 'use strict';
 const $=id=>document.getElementById(id), canvas=$('plot'), c=canvas.getContext('2d');
 const W=1100,H=618,box={left:86,right:1031,top:76,bottom:475},trackY=574;
+const PHYSICS_STEP=.005;
 const forceCanvas=$('forcePlot'),fc=forceCanvas.getContext('2d');
 let forceProfile=null;
-const state={mode:'points',adding:false,points:[],selected:null,drag:null,playing:false,t0:null,view:{xmin:0,xmax:10,umin:-1,umax:11},forceView:null,uManual:false,pauseReason:null,m:1,x:1.2,v:0,E:0,acc:0,eqFn:null,expression:'',nudge:null,eqs:[],msgTimeout:null,hover:null};
+const state={mode:'points',adding:false,points:[],selected:null,drag:null,playing:false,t0:null,stepRemainder:0,simTime:0,view:{xmin:0,xmax:10,umin:-1,umax:11},forceView:null,uManual:false,pauseReason:null,m:1,x:1.2,v:0,E:0,referenceE:0,energyScale:1,acc:0,eqFn:null,expression:'',nudge:null,eqs:[],msgTimeout:null,hover:null};
 const sample=[{x:0.18,u:8.7},{x:1.20,u:4.1},{x:2.35,u:1.05},{x:5.12,u:5.55},{x:7.35,u:2.36},{x:9.7,u:9.4}];
 function clamp(x,a,b){return Math.max(a,Math.min(b,x));}
 function num(id,fallback){let v=Number($(id).value);return Number.isFinite(v)?v:fallback;}
@@ -411,7 +417,8 @@ function equationError(message=''){
  $('equation').setAttribute('aria-invalid',String(Boolean(message)));
 }
 function U(x){try{const v=state.mode==='equation'&&state.eqFn?state.eqFn(x):uPoint(x);return Number.isFinite(v)?v:NaN;}catch{return NaN;}}
-function F(x){if(state.mode==='points')return-dPoint(x);const span=state.view.xmax-state.view.xmin,h=1e-4*span;return-(U(x+h)-U(x-h))/(2*h);}
+function derivativeStep(x){return Math.cbrt(Number.EPSILON)*Math.max(1,Math.abs(x));}
+function F(x){if(state.mode==='points')return-dPoint(x);const h=derivativeStep(x);return-(U(x+h)-U(x-h))/(2*h);}
 function projectX(x){return box.left+(x-state.view.xmin)/(state.view.xmax-state.view.xmin)*(box.right-box.left);}
 function projectY(u){return box.bottom-(u-state.view.umin)/(state.view.umax-state.view.umin)*(box.bottom-box.top);}
 function unprojectX(sx){return state.view.xmin+(sx-box.left)/(box.right-box.left)*(state.view.xmax-state.view.xmin);}
@@ -457,16 +464,25 @@ function syncPlay(){
  $('play').textContent=state.playing?'Ⅱ Pause':'▶ Play';
  $('play').disabled=state.pauseReason?.kind==='precision';
  const side=outsideView();
- $('statusText').textContent=state.pauseReason?`Paused · ${state.pauseReason.kind==='edge'?'reached edge of view':'numerical precision limit'}`:state.nudge?'Nudging':state.playing?(side?`Playing · beyond ${side} edge of graph`:'Playing'):(side?`Paused · beyond ${side} edge of graph`:'Paused');
+ $('statusText').textContent=state.pauseReason?`Paused · ${state.pauseReason.kind==='edge'?'reached edge of view':'numerical accuracy limit'}`:state.nudge?'Nudging':state.playing?(side?`Playing · beyond ${side} edge of graph`:'Playing'):(side?`Paused · beyond ${side} edge of graph`:'Paused');
  $('motionNote').classList.toggle('hidden',!state.pauseReason);
  $('motionText').textContent=state.pauseReason?.text||'';
  $('continueOutside').classList.toggle('hidden',state.pauseReason?.kind!=='edge');
 }
-function stop(){state.playing=false;state.t0=null;syncPlay();}
+function stop(){state.playing=false;state.t0=null;state.stepRemainder=0;syncPlay();}
 function pauseMotion(kind,text){state.pauseReason={kind,text};stop();}
-function setAt(x,ke){state.pauseReason=null;state.x=clamp(x,state.view.xmin,state.view.xmax);let K=Math.max(0,ke),dir=num('direction',1);state.m=Math.max(.01,num('mass',1));state.v=dir*Math.sqrt(2*K/state.m);state.acc=F(state.x)/state.m;state.E=U(state.x)+K;syncPlay();updateStats();}
+function setAt(x,ke){state.pauseReason=null;state.x=clamp(x,state.view.xmin,state.view.xmax);let K=Math.max(0,ke),dir=num('direction',1);state.m=Math.max(.01,num('mass',1));state.v=dir*Math.sqrt(2*K/state.m);state.acc=F(state.x)/state.m;state.E=U(state.x)+K;state.referenceE=state.E;state.energyScale=Math.max(1,Math.abs(state.referenceE));state.simTime=0;state.stepRemainder=0;syncPlay();updateStats();}
 function reset(){state.nudge=null;stop();setAt(num('x0',1.2),num('initialKE',0));fitEnergyIfNeeded();draw();}
-function updateStats(){const k=.5*state.m*state.v*state.v;for(const [id,value] of [['xRead',state.x],['vRead',state.v],['aRead',state.acc],['uRead',U(state.x)],['keRead',k],['eRead',state.E]])setReading(id,value);let near=state.eqs.find(e=>Math.abs(e.x-state.x)<.015);$('eqStatus').textContent=near?`${near.kind[0].toUpperCase()+near.kind.slice(1)} equilibrium at x = ${fmt(near.x)} m`:' ';}
+function updateStats(){
+ const k=.5*state.m*state.v*state.v;
+ for(const [id,value] of [['xRead',state.x],['vRead',state.v],['aRead',state.acc],['uRead',U(state.x)],['keRead',k],['eRead',state.E]])setReading(id,value);
+ const error=state.E-state.referenceE,relative=Math.abs(error)/state.energyScale;
+ const drift=Math.abs(error)<state.energyScale*1e-12?'0.00':`${error>0?'+':''}${error.toExponential(2)}`;
+ $('energyDrift').textContent=`${drift} J`;
+ $('energyMonitor').classList.toggle('warning',relative>.001);
+ $('energyMonitor').title=`Calculated total minus expected total, including nudges. Expected: ${state.referenceE} J. Drift: ${error} J. Motion pauses if drift exceeds 1% of max(1 J, |expected energy|).`;
+ let near=state.eqs.find(e=>Math.abs(e.x-state.x)<.015);$('eqStatus').textContent=near?`${near.kind[0].toUpperCase()+near.kind.slice(1)} equilibrium at x = ${fmt(near.x)} m`:' ';
+}
 function fitEnergyIfNeeded(){if(!state.uManual&&state.E>state.view.umax-.3)state.view.umax=state.E+Math.max(1,(state.view.umax-state.view.umin)*.10);}
 function fit(){let lo=Infinity,hi=-Infinity;for(let i=0;i<=800;i++){let x=state.view.xmin+(state.view.xmax-state.view.xmin)*i/800;let val=U(x);if(Number.isFinite(val)){lo=Math.min(lo,val);hi=Math.max(hi,val);}}if(!Number.isFinite(lo)){lo=0;hi=10;}hi=Math.max(hi,state.E);const pad=Math.max(0.75,(hi-lo)*.12);state.view.umin=lo-pad;state.view.umax=hi+pad;state.uManual=false;state.forceView=null;draw();}
 function refreshMode(){state.mode=$('buildMode').value;state.adding=false;$('pointTools').classList.toggle('hidden',state.mode!=='points');$('eqTools').classList.toggle('hidden',state.mode!=='equation');refreshAddButton();updateEquilibria();reset();}
@@ -563,7 +579,7 @@ function drawEquilibriumMarkers(){
 function plottedForce(x){
  const f=F(x);
  if(state.mode==='points')return f;
- const h=(state.view.xmax-state.view.xmin)*1e-4,u=U(x);
+ const h=derivativeStep(x),u=U(x);
  const left=-(u-U(x-h))/h,right=-(U(x+h)-u)/h;
  if(!Number.isFinite(left)||!Number.isFinite(right)||Math.abs(left-right)>.02*Math.max(1,Math.abs(left),Math.abs(right)))return NaN;
  return f;
@@ -786,57 +802,54 @@ function nudge(dir){
  if(amount===null){msg('Enter a positive nudge energy (at least 0.01 J).');return;}
  stop();state.nudge={dir,amount,age:0,impacted:false,startX:state.x,startU:U(state.x)};syncPlay();requestAnimationFrame(frame);
 }
-function impact(n){const k=.5*state.m*state.v*state.v+n.amount;state.v=n.dir*Math.sqrt(2*k/state.m);state.E=U(state.x)+k;state.acc=F(state.x)/state.m;fitEnergyIfNeeded();state.playing=true;state.t0=null;updateStats();}
-// Velocity-Verlet step with conservation of total energy.
-// Graph x-limits are VIEWPORT boundaries, not reflecting walls. Motion is
-// allowed beyond either edge; only U(x) > E can cause a physical turning point.
+function impact(n){const k=.5*state.m*state.v*state.v+n.amount;state.v=n.dir*Math.sqrt(2*k/state.m);state.E=U(state.x)+k;state.referenceE+=n.amount;state.energyScale=Math.max(1,Math.abs(state.referenceE));state.acc=F(state.x)/state.m;fitEnergyIfNeeded();state.playing=true;state.t0=null;state.stepRemainder=0;updateStats();}
+// Standard velocity-Verlet. Energy is measured, never projected back onto
+// a target. The force changes the sign of velocity naturally at turning points.
+function verletStep(x,v,m,h){
+ const a0=F(x)/m,nextX=x+v*h+.5*a0*h*h;
+ const a1=F(nextX)/m,nextV=v+.5*(a0+a1)*h,u=U(nextX);
+ return {x:nextX,v:nextV,acc:a1,a0,u,k:.5*m*nextV*nextV};
+}
+// Graph limits are viewport boundaries. When requested, stop at the crossing
+// time using a shortened Verlet step, with no artificial reflection.
 function advance(h){
  if($('pauseOutside').checked&&outsideView()){
   pauseMotion('edge','The particle is outside the view. Expand the position limits or continue outside the view.');return;
  }
- const old=state.x,prevV=state.v,a0=F(old)/state.m;
- let cand=old+prevV*h+.5*a0*h*h;
- const vPredict=prevV+a0*h;
- if(!Number.isFinite(cand)){pauseMotion('precision','Motion exceeded the numerical range. Reset to begin again.');return;}
- let reachedEdge=null;
+ const old=state.x,prevV=state.v;
+ let next=verletStep(old,prevV,state.m,h),reachedEdge=null;
+ if(!Number.isFinite(next.x)){pauseMotion('precision','Motion exceeded the numerical range. Reset to begin again.');return;}
  if($('pauseOutside').checked){
-  if(cand>state.view.xmax){cand=state.view.xmax;reachedEdge='right';}
-  else if(cand<state.view.xmin){cand=state.view.xmin;reachedEdge='left';}
+  if(next.x>state.view.xmax)reachedEdge='right';
+  else if(next.x<state.view.xmin)reachedEdge='left';
+  if(reachedEdge){
+   const edge=reachedEdge==='right'?state.view.xmax:state.view.xmin;
+   let lo=0,hi=h;
+   for(let i=0;i<48;i++){
+    const mid=(lo+hi)/2,x=old+prevV*mid+.5*next.a0*mid*mid;
+    if(reachedEdge==='right'?x>edge:x<edge)hi=mid;else lo=mid;
+   }
+   h=(lo+hi)/2;next=verletStep(old,prevV,state.m,h);next.x=edge;
+  }
  }
- const u=U(cand);
- if(!Number.isFinite(u)){pauseMotion('precision','Potential is not defined at the next position. Reset or change the equation.');return;}
- // Stop before subtracting large opposing U and KE values loses the total
- // energy to round-off. Allow one part per million relative to max(1 J, |E|).
- const energyScale=Math.max(1,Math.abs(state.E)),k=state.E-u;
- if(u<=state.E&&(!Number.isFinite(k)||Number.EPSILON*8*Math.max(Math.abs(u),Math.abs(k))>energyScale*1e-6)){
+ if(![next.u,next.k,next.v,next.acc].every(Number.isFinite)){
+  pauseMotion('precision','The motion could not be calculated reliably at the next position. Reset or change the equation.');return;
+ }
+ // Round-off and excessive integration error stop the run at its last accepted
+ // state. Neither guard changes velocity to enforce energy conservation.
+ if(Number.EPSILON*8*Math.max(Math.abs(next.u),next.k)>state.energyScale*1e-6){
   pauseMotion('precision','The energies are too large to resolve total energy reliably. Reset or choose a less extreme starting position.');return;
  }
- if(u>state.E+1e-8){
-   // A real turning point: find U(x) = E between the last accessible position
-   // and the proposed one. Reverse ONLY here, never at the graph border.
-   let a=old,b=cand;
-   if(U(a)>state.E+1e-6){stop();return;}
-   for(let k=0;k<45;k++){const mid=(a+b)/2;if(U(mid)<=state.E)a=mid;else b=mid;}
-   state.x=a;
-   state.v=-Math.sign(cand-old)*Math.sqrt(Math.max(0,2*(state.E-U(a))/state.m));
-   if(!Number.isFinite(state.v))state.v=0;
-   reachedEdge=null;
- }else{
-   state.x=cand;
-   const a1=F(state.x)/state.m;
-   const vn=vPredict+.5*a1*h;
-   const sign=Math.sign(vn)||Math.sign(prevV)||1;
-   state.v=sign*Math.sqrt(Math.max(0,2*(state.E-u)/state.m));
+ const total=next.u+next.k;
+ if(!Number.isFinite(total)||Math.abs(total-state.referenceE)>.01*state.energyScale){
+  pauseMotion('precision','The next step would exceed the 1% energy-drift limit. Reset and try a less steep potential or a larger mass.');return;
  }
- state.acc=F(state.x)/state.m;
- if(!Number.isFinite(state.acc)||!Number.isFinite(state.v)){
-   pauseMotion('precision','The motion could not be calculated reliably at this position. Reset or change the equation.');return;
- }
- if(reachedEdge)pauseMotion('edge',`The particle reached the ${reachedEdge} edge of the view. Its velocity is preserved. Expand the position limits or continue outside the view.`);
+ state.x=next.x;state.v=next.v;state.acc=next.acc;state.E=total;state.simTime+=h;
+ if(reachedEdge)pauseMotion('edge',`The particle reached the ${reachedEdge} edge of the view without bouncing. Expand the position limits or continue outside the view.`);
 }
 let nextAnim=false;function frame(ts){if(nextAnim)return;nextAnim=true;try{if(state.t0===null)state.t0=ts;let dt=Math.min(.045,Math.max(0,(ts-state.t0)/1000));state.t0=ts;let doMore=false;if(state.nudge){const n=state.nudge;n.age+=dt/.65;if(!n.impacted&&n.age>=.38){n.impacted=true;impact(n);}if(n.age>=1)state.nudge=null;else doMore=true;}
-if(state.playing){let remain=dt*num('speed',1);let guard=0;while(remain>1e-8&&guard++<80){const h=Math.min(.0075,remain);advance(h);remain-=h;if(!state.playing)break;}doMore=state.playing||doMore;updateStats();}syncPlay();draw();if(doMore)requestAnimationFrame(frame);}finally{nextAnim=false;}}
-function startAnimation(){state.t0=null;requestAnimationFrame(frame);}
+if(state.playing){state.stepRemainder+=dt*num('speed',1);let guard=0;while(state.stepRemainder>=PHYSICS_STEP&&guard++<80){state.stepRemainder-=PHYSICS_STEP;advance(PHYSICS_STEP);if(!state.playing)break;}doMore=state.playing||doMore;updateStats();}syncPlay();draw();if(doMore)requestAnimationFrame(frame);}finally{nextAnim=false;}}
+function startAnimation(){state.t0=null;state.stepRemainder=0;requestAnimationFrame(frame);}
 function play(){
  if(state.nudge||state.pauseReason?.kind==='precision')return;
  if(state.playing){stop();draw();return;}
