@@ -85,7 +85,6 @@ aside {padding:9px;max-height:calc(100vh - 59px)}
 .option {font-size:14px;font-weight:650}
 .group .option {margin-top:7px!important}
 .group .fields[style] {margin-top:6px!important}
-.snap-row {margin-top:8px;padding-top:7px;border-top:1px solid #e6edf5}
 .eq {margin-top:6px}
 .hint {font-size:12.5px}
 main {padding:10px}
@@ -200,6 +199,12 @@ main {padding:10px}
 .readout-panel .motion-note .btn{width:100%;font-size:12px}
 .initial-group .msg{background:#eef5ff;color:#365e90;line-height:1.4}
 .group.playback-group{--sec:#176c4d;--sec-bg:#edf9f3;border-left:3px solid #50a881}
+.initial-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:end;gap:7px;margin-top:8px}
+.initial-actions .field select{font-size:14px}
+.initial-actions .btn{height:39px;min-height:39px;font-size:12px;line-height:1.15;padding:4px 5px}
+.playback-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:end;gap:6px}
+.playback-row .field select{height:36px;padding:5px 6px;font-size:14px}
+.playback-row .btn{height:36px;min-height:36px;min-width:0;padding:5px 4px;font-size:13px;white-space:nowrap}
 @media(max-width:1200px){
  .layout{grid-template-columns:290px minmax(0,1fr) 155px;gap:9px}
  .readout-panel .stat .number{font-size:23px}
@@ -249,20 +254,24 @@ main {padding:10px}
   <div class="field"><label for="initialKE">KE₀ (J)</label><input type="number" id="initialKE" value="0" min="0" max="100" step="0.1" title="Initial kinetic energy must be between 0 and 100 J."></div>
   <div class="field"><label for="mass">m (kg)</label><input type="number" id="mass" value="1" min="0.01" max="100" step="0.01" title="Mass must be between 0.01 and 100 kg."></div>
  </div>
- <div class="field" style="margin-top:8px"><label for="direction">Initial velocity</label><select id="direction"><option value="1">→ Right</option><option value="-1">← Left</option></select></div>
- <div class="btnrow snap-row"><button id="snapNearest" class="btn highlight">◎ Snap to nearest equilibrium</button></div>
+ <div class="initial-actions">
+  <div class="field"><label for="direction">Initial velocity</label><select id="direction"><option value="1">→ Right</option><option value="-1">← Left</option></select></div>
+  <button id="snapNearest" class="btn highlight">◎ Snap to nearest equilibrium</button>
+ </div>
  <div id="initialNotice" class="msg" role="status"></div>
 </section>
 <section class="group playback-group" aria-label="Playback controls"><h2>Playback</h2>
- <div class="field"><label for="speed">Playback speed</label><select id="speed"><option value="0.25">¼×</option><option value="0.5">½×</option><option value="1" selected>1×</option><option value="1.5">1½×</option><option value="2">2×</option></select></div>
- <div class="btnrow"><button id="play" class="btn primary">▶ Play</button><button id="reset" class="btn">↺ Reset</button></div>
+ <div class="playback-row">
+  <div class="field"><label for="speed">Speed</label><select id="speed" aria-label="Playback speed"><option value="0.25">¼×</option><option value="0.5">½×</option><option value="1" selected>1×</option><option value="1.5">1½×</option><option value="2">2×</option></select></div>
+  <button id="play" class="btn primary">▶ Play</button><button id="reset" class="btn">↺ Reset</button>
+ </div>
 </section>
 <section class="group nudge-group"><h2>Nudge</h2>
  <div class="nudge-control-row">
-  <div class="field nudge-energy-field"><label for="deltaE">ΔE (J)</label><input type="number" id="deltaE" value="0.50" min="0.01" step="0.01" aria-describedby="deltaEHelp"></div>
+  <div class="field nudge-energy-field"><label for="deltaE">ΔE (J)</label><input type="number" id="deltaE" value="0.50" min="0.01" max="1" step="0.01" aria-describedby="deltaEHelp" title="Each nudge adds between 0.01 and 1.0 J."></div>
   <div class="btnrow"><button id="nudgeLeft" class="btn nudge" aria-label="Nudge left"><span class="nudge-icon" aria-hidden="true">👈</span><span>Nudge left</span></button><button id="nudgeRight" class="btn nudge" aria-label="Nudge right"><span class="nudge-icon" aria-hidden="true">👉</span><span>Nudge right</span></button></div>
  </div>
- <span id="deltaEHelp" class="hint hint-error hidden" role="alert">Nudge energy must be greater than zero (minimum 0.01 J).</span>
+ <span id="deltaEHelp" class="hint hint-error hidden" role="alert">Nudge energy must be between 0.01 and 1.0 J.</span>
 </section>
 
  <section class="group display-strip display-group" aria-label="Display controls">
@@ -825,8 +834,9 @@ canvas.addEventListener('pointermove',e=>{let p=pointerPos(e);if(!state.drag){co
 function endPointer(e){state.drag=null;try{canvas.releasePointerCapture(e.pointerId);}catch{}draw();}canvas.addEventListener('pointerup',endPointer);canvas.addEventListener('pointercancel',endPointer);
 function validNudgeEnergy(){
  const input=$('deltaE'),amount=Number(input.value);
- const valid=input.value.trim()!==''&&Number.isFinite(amount)&&amount>=0.01;
+ const valid=input.value.trim()!==''&&Number.isFinite(amount)&&amount>=0.01&&amount<=1;
  input.classList.toggle('input-error',!valid);
+ input.setAttribute('aria-invalid',String(!valid));
  $('deltaEHelp').classList.toggle('hidden',valid);
  $('nudgeLeft').disabled=!valid;$('nudgeRight').disabled=!valid;
  return valid?amount:null;
@@ -835,7 +845,7 @@ function nudge(dir){
  if(state.nudge)return;
  if(state.pauseReason?.kind==='precision')return;
  const amount=validNudgeEnergy();
- if(amount===null){msg('Enter a positive nudge energy (at least 0.01 J).');return;}
+ if(amount===null){msg('Enter a nudge energy between 0.01 and 1.0 J.');return;}
  stop();state.nudge={dir,amount,age:0,impacted:false,startX:state.x,startU:U(state.x)};syncPlay();requestAnimationFrame(frame);
 }
 function impact(n){const k=.5*state.m*state.v*state.v+n.amount;state.v=n.dir*Math.sqrt(2*k/state.m);state.E=U(state.x)+k;state.referenceE+=n.amount;state.energyScale=Math.max(1,Math.abs(state.referenceE));state.acc=F(state.x)/state.m;fitEnergyIfNeeded();state.playing=true;state.t0=null;state.stepRemainder=0;updateStats();}
