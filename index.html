@@ -188,7 +188,7 @@ main {padding:10px}
   <div class="btnrow"><button class="btn" id="addPoint">＋ Add points: OFF</button><button class="btn" id="deletePoint" title="Select a point to delete it">Delete point</button></div>
   <div class="btnrow"><button class="btn" id="sampleCurve">↺ Sample curve</button><button class="btn" id="clearCurve">Clear</button></div>
  </div>
- <div id="eqTools" class="hidden"><div class="eq"><label class="field-label" for="equation">U(x) in joules</label><input class="eqbox" id="equation" spellcheck="false" value="0.12*(x-2)^2*(x-7)^2+1" /></div><div class="btnrow"><button id="applyEquation" class="btn primary">Plot equation</button></div></div>
+ <div id="eqTools" class="hidden"><div class="eq"><label class="field-label" for="equation">U(x) in joules</label><input class="eqbox" id="equation" spellcheck="false" value="0.12*(x-2)^2*(x-7)^2+1" aria-describedby="equationError" /></div><div id="equationError" class="hint hint-error hidden" role="alert"></div><div class="btnrow"><button id="applyEquation" class="btn primary">Plot equation</button></div></div>
 </section>
 <section class="group initial-group"><h2>Initial Conditions</h2>
  <div class="fields three">
@@ -279,7 +279,77 @@ const left=p[i],right=p[i+1],h=right.x-left.x,t=(x-left.x)/h;
 if(x<left.x)return left.u+ms[i]*(x-left.x);if(x>right.x)return right.u+ms[i+1]*(x-right.x);
 return(2*t*t*t-3*t*t+1)*left.u+(t*t*t-2*t*t+t)*h*ms[i]+(-2*t*t*t+3*t*t)*right.u+(t*t*t-t*t)*h*ms[i+1];}
 function dPoint(x){const p=state.points,n=p.length;if(n<2)return 0;if(!curveCache.valid){curveCache.ms=slopes();curveCache.valid=true;}const ms=curveCache.ms;let i;if(x<=p[0].x)return ms[0];if(x>=p[n-1].x)return ms[n-1];let lo=0,hi=n-1;while(hi-lo>1){const m=(lo+hi)>>1;if(x<p[m].x)hi=m;else lo=m;}i=lo;const a=p[i],b=p[i+1],h=b.x-a.x,t=(x-a.x)/h;return ((6*t*t-6*t)*a.u+ (3*t*t-4*t+1)*h*ms[i]+(-6*t*t+6*t)*b.u+(3*t*t-2*t)*h*ms[i+1])/h;}
-function compile(s){const input=s.replace(/\^/g,'**').trim();if(!/^[\d\w.\s+*/(),\-]*$/.test(input))throw Error('Use only numbers, x, operators, parentheses and standard functions.');const allowed=new Set(['x','sin','cos','tan','asin','acos','atan','sqrt','abs','exp','log','log10','pow','min','max','floor','ceil','round','PI','E']);const ids=input.match(/[a-zA-Z_][a-zA-Z_0-9]*/g)||[];for(const id of ids){if(!allowed.has(id))throw Error('Unrecognized symbol: '+id);}const f=new Function('x','"use strict";const {sin,cos,tan,asin,acos,atan,sqrt,abs,exp,log,log10,pow,min,max,floor,ceil,round,PI,E}=Math;return ('+input+');');for(let k=0;k<8;k++){const v=f(state.view.xmin+(state.view.xmax-state.view.xmin)*(k+.35)/8);if(!Number.isFinite(v))throw Error('The equation has undefined values in the plotted range.');}return f;}
+// Parse mathematical precedence explicitly: -x^2 = -(x^2), while (-x)^2
+// squares the negative base. Powers associate right and allow signed exponents.
+function compile(s){
+ const input=s.trim(),tokens=[];
+ const token=/\s*(?:(\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?|([A-Za-z_]\w*)|(\*\*|[+\-*/^(),]))/y;
+ let offset=0,pos=0;
+ while(offset<input.length){
+  token.lastIndex=offset;const match=token.exec(input);
+  if(!match)throw Error('Use only numbers, x, operators, parentheses and standard functions.');
+  tokens.push({text:match[0].trim(),type:match[1]?'number':match[2]?'name':'operator'});offset=token.lastIndex;
+ }
+ const functions=new Map(['sin','cos','tan','asin','acos','atan','sqrt','abs','exp','log','log10','pow','min','max','floor','ceil','round'].map(name=>[name,Math[name]]));
+ const peek=()=>tokens[pos]?.text;
+ function take(value){if(peek()===value){pos++;return true;}return false;}
+ function expect(value){if(!take(value))throw Error('Expected "'+value+'" in the equation.');}
+ function primary(){
+  if(take('(')){const value=expression();expect(')');return value;}
+  const current=tokens[pos++];
+  if(!current)throw Error('The equation is incomplete.');
+  if(current.type==='number'){const value=Number(current.text);return ()=>value;}
+  if(current.type==='name'){
+   if(current.text==='x')return x=>x;
+   if(current.text==='PI')return ()=>Math.PI;
+   if(current.text==='E')return ()=>Math.E;
+   const fn=functions.get(current.text);
+   if(!fn)throw Error('Unrecognized symbol: '+current.text);
+   expect('(');const args=[];
+   if(!take(')')){do{args.push(expression());}while(take(','));expect(')');}
+   return x=>fn(...args.map(arg=>arg(x)));
+  }
+  throw Error('Expected a number, x, function or parenthesis.');
+ }
+ function power(){
+  const base=primary();
+  if(take('^')||take('**')){const exponent=unary();return x=>base(x)**exponent(x);}
+  return base;
+ }
+ function unary(){
+  if(take('+'))return unary();
+  if(take('-')){const value=unary();return x=>-value(x);}
+  return power();
+ }
+ function product(){
+  let value=unary();
+  while(peek()==='*'||peek()==='/'){
+   const op=tokens[pos++].text,left=value,right=unary();
+   value=op==='*'?x=>left(x)*right(x):x=>left(x)/right(x);
+  }
+  return value;
+ }
+ function expression(){
+  let value=product();
+  while(peek()==='+'||peek()==='-'){
+   const op=tokens[pos++].text,left=value,right=product();
+   value=op==='+'?x=>left(x)+right(x):x=>left(x)-right(x);
+  }
+  return value;
+ }
+ const f=expression();
+ if(pos!==tokens.length)throw Error('Unexpected "'+peek()+'". Use * between multiplied terms.');
+ for(let k=0;k<8;k++){
+  const v=f(state.view.xmin+(state.view.xmax-state.view.xmin)*(k+.35)/8);
+  if(!Number.isFinite(v))throw Error('The equation has undefined values in the plotted range.');
+ }
+ return f;
+}
+function equationError(message=''){
+ $('equationError').textContent=message;
+ $('equationError').classList.toggle('hidden',!message);
+ $('equation').setAttribute('aria-invalid',String(Boolean(message)));
+}
 function U(x){try{const v=state.mode==='equation'&&state.eqFn?state.eqFn(x):uPoint(x);return Number.isFinite(v)?v:NaN;}catch{return NaN;}}
 function F(x){if(state.mode==='points')return-dPoint(x);const span=state.view.xmax-state.view.xmin,h=1e-4*span;return-(U(x+h)-U(x-h))/(2*h);}
 function projectX(x){return box.left+(x-state.view.xmin)/(state.view.xmax-state.view.xmin)*(box.right-box.left);}
@@ -638,7 +708,8 @@ $('deletePoint').addEventListener('click',()=>{if(!state.selected){msg('Select a
 $('sampleCurve').addEventListener('click',()=>{state.points=sample.map(p=>({...p}));state.selected=null;invalidate();updateEquilibria();reset();fit();});
 $('clearCurve').addEventListener('click',()=>{state.points=[];state.selected=null;invalidate();updateEquilibria();reset();});
 $('buildMode').addEventListener('change',()=>{if($('buildMode').value==='equation'&&!state.eqFn){try{state.eqFn=compile($('equation').value);}catch(err){msg(err.message);$('buildMode').value='points';return;}}refreshMode();fit();});
-$('applyEquation').addEventListener('click',()=>{try{const f=compile($('equation').value);state.eqFn=f;state.expression=$('equation').value;updateEquilibria();reset();fit();}catch(err){msg(err.message);}});
+$('applyEquation').addEventListener('click',()=>{try{const f=compile($('equation').value);state.eqFn=f;state.expression=$('equation').value;equationError();updateEquilibria();reset();fit();}catch(err){equationError(err.message);}});
+$('equation').addEventListener('input',()=>equationError());
 $('deltaE').addEventListener('input',validNudgeEnergy);
 $('deltaE').addEventListener('change',validNudgeEnergy);
 $('nudgeLeft').addEventListener('click',()=>{nudge(-1);});$('nudgeRight').addEventListener('click',()=>{nudge(1);});
