@@ -482,7 +482,28 @@ function rounded(x,y,w,h,r,fill,stroke){c.beginPath();c.roundRect(x,y,w,h,r);if(
 function text(txt,x,y,size=15,color='#203047',weight=500){c.fillStyle=color;c.font=`${weight} ${size}px system-ui, sans-serif`;c.fillText(txt,x,y);}
 function line(x1,y1,x2,y2,color,width=1,dash=[]){c.save();c.beginPath();c.setLineDash(dash);c.strokeStyle=color;c.lineWidth=width;c.moveTo(x1,y1);c.lineTo(x2,y2);c.stroke();c.restore();}
 function drawArrow(x1,y1,x2,y2,color,width=4){if(Math.abs(x2-x1)<1)return;line(x1,y1,x2,y2,color,width);const d=x2>x1?1:-1;c.fillStyle=color;c.beginPath();c.moveTo(x2,y2);c.lineTo(x2-d*11,y2-6);c.lineTo(x2-d*11,y2+6);c.closePath();c.fill();}
-function grid(){const xstep=(state.view.xmax-state.view.xmin)/10,ustep=(state.view.umax-state.view.umin)/8;for(let i=0;i<=10;i++){const x=projectX(state.view.xmin+i*xstep);line(x,box.top,x,box.bottom,'#e7edf4',1);}for(let i=0;i<=8;i++){const y=projectY(state.view.umin+i*ustep);line(box.left,y,box.right,y,'#e7edf4',1);}}
+// Round the tick spacing, while leaving the exact viewing limits untouched.
+// Keep interior labels clear of the editable endpoint controls.
+function verticalTicks(min,max,target=6,height=399){
+ const span=max-min,raw=span/target;
+ if(!Number.isFinite(span)||!(raw>0))return [];
+ const unit=10**Math.floor(Math.log10(raw));
+ const normalized=raw/unit;
+ const factor=[1,2,2.5,5,10].reduce((best,next)=>Math.abs(Math.log(next/normalized))<Math.abs(Math.log(best/normalized))?next:best);
+ const step=factor*unit,ticks=[];
+ if(!(step>0))return ticks;
+ const first=Math.ceil(min/step),last=Math.floor(max/step),margin=22/height*span;
+ for(let i=0;i<=Math.min(100,last-first);i++){
+  const value=Number(((first+i)*step).toPrecision(15));
+  if(value-min>margin&&max-value>margin)ticks.push(value===0?0:value);
+ }
+ return ticks;
+}
+function tickLabel(value){
+ const magnitude=Math.abs(value);
+ return magnitude>=1e4||(magnitude>0&&magnitude<.001)?value.toExponential(3).replace(/\.?0+e/,'e').replace('e+','e'):String(Number(value.toPrecision(12)));
+}
+function grid(){const xstep=(state.view.xmax-state.view.xmin)/10;for(let i=0;i<=10;i++){const x=projectX(state.view.xmin+i*xstep);line(x,box.top,x,box.bottom,'#e7edf4',1);}for(const u of verticalTicks(state.view.umin,state.view.umax,6,box.bottom-box.top)){const y=projectY(u);line(box.left,y,box.right,y,'#e7edf4',1);}}
 function plotCurve(){c.save();c.beginPath();c.rect(box.left,box.top,box.right-box.left,box.bottom-box.top);c.clip();c.beginPath();let started=false;for(let i=0;i<=1050;i++){const x=state.view.xmin+(state.view.xmax-state.view.xmin)*i/1050,p=projectY(U(x));if(!Number.isFinite(p)){started=false;continue;}if(!started){c.moveTo(projectX(x),p);started=true;}else c.lineTo(projectX(x),p);}c.strokeStyle='#213047';c.lineWidth=4;c.lineJoin='round';c.lineCap='round';c.stroke();c.restore();}
 // Position of the hand through a single push: approach, touch, pull away.
 // The block/marble do not carry the hand with them after impact.
@@ -664,11 +685,11 @@ function drawForcePlot(){
  };
  fc.clearRect(0,0,W,260);fc.fillStyle='#fcfbfe';fc.fillRect(box.left,top,box.right-box.left,bottom-top);
  fc.font='700 15px system-ui';fc.fillStyle='#526882';
- for(let i=0;i<=4;i++){
-  const f=range.max-(range.max-range.min)*i/4,y=fy(f);
-  if($('showGrid').checked&&i!==2)segment(box.left,y,box.right,y,'#eee9f5');
+ for(const f of verticalTicks(range.min,range.max,4,bottom-top)){
+  const y=fy(f);
+  if($('showGrid').checked&&f!==0)segment(box.left,y,box.right,y,'#eee9f5');
   segment(box.left-5,y,box.left,y,'#9eacba');
-  if(i>0&&i<4){fc.textAlign='right';fc.fillText(forceLabel(f),box.left-10,y+5);}
+  fc.textAlign='right';fc.fillText(tickLabel(f),box.left-10,y+5);
  }
  for(let i=0;i<=10;i++){
   const x=state.view.xmin+(state.view.xmax-state.view.xmin)*i/10,sx=projectX(x);
@@ -709,7 +730,7 @@ if($('showGrid').checked)grid();
 drawEquilibriumGuides();
 text('POTENTIAL ENERGY',box.left,36,19,'#425c7a',850);text('U (J)',box.left-63,box.top-13,20,'#1e2f47',800);text('x (m)',box.right+8,box.bottom+6,20,'#1e2f47',800);
 line(box.left,box.top,box.left,box.bottom,'#6c7e93',1.6);line(box.left,box.bottom,box.right,box.bottom,'#6c7e93',1.6);
-c.save();c.font='700 15px system-ui';c.fillStyle='#526882';c.textAlign='center';for(let i=0;i<=10;i++){let x=state.view.xmin+(state.view.xmax-state.view.xmin)*i/10;let sx=projectX(x);line(sx,box.bottom,sx,box.bottom+5,'#9eacba');if(i>0&&i<10)c.fillText(axisLabel(x),sx,box.bottom+19);}c.textAlign='right';for(let i=0;i<=5;i++){const u=state.view.umin+(state.view.umax-state.view.umin)*i/5,y=projectY(u);line(box.left-5,y,box.left,y,'#9eacba');if(i>0&&i<5)c.fillText(axisLabel(u),box.left-10,y+4);}c.restore();
+c.save();c.font='700 15px system-ui';c.fillStyle='#526882';c.textAlign='center';for(let i=0;i<=10;i++){let x=state.view.xmin+(state.view.xmax-state.view.xmin)*i/10;let sx=projectX(x);line(sx,box.bottom,sx,box.bottom+5,'#9eacba');if(i>0&&i<10)c.fillText(axisLabel(x),sx,box.bottom+19);}c.textAlign='right';for(const u of verticalTicks(state.view.umin,state.view.umax,6,box.bottom-box.top)){const y=projectY(u);line(box.left-5,y,box.left,y,'#9eacba');c.fillText(tickLabel(u),box.left-10,y+4);}c.restore();
 const px=projectX(state.x),pu=projectY(U(state.x));
 // Total E and vertical KE segment
 const eY=projectY(state.E);if($('showEnergy').checked&&Number.isFinite(eY)){line(box.left,eY,box.right,eY,'#0a9061',2.8,[11,6]);text('E',box.right-20,Math.max(box.top+17,eY-10),22,'#008252',850);}
