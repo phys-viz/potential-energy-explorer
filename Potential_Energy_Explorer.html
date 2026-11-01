@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Potential Energy Explorer</title>
+<style>
+:root{--bg:#f1f5fb;--paper:#fff;--ink:#18263a;--secondary:#65748a;--line:#e0e7f0;--blue:#2563eb;--blue2:#dbeafe;--green:#0a9061;--gold:#f4a340;--shadow:0 8px 30px rgba(30,54,85,.065)}
+*{box-sizing:border-box}body{margin:0;color:var(--ink);background:linear-gradient(145deg,#eef5ff 0%,#f7f9fc 44%,#eff6f7 100%);font:14px/1.35 system-ui,-apple-system,"Segoe UI",Arial,sans-serif}button,input,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.4;cursor:default}.shell{max-width:1480px;margin:auto;padding:15px 18px 20px}.heading{display:flex;align-items:center;justify-content:space-between;gap:15px;margin:0 0 12px;padding:0 4px}.heading h1{font-size:25px;letter-spacing:-.7px;margin:0;font-weight:770}.heading .subtitle{color:var(--secondary);font-size:13px;margin-top:2px}.header-key{background:#fff;border:1px solid #dfebf4;color:#4b6989;border-radius:999px;padding:7px 11px;font-size:12px;font-weight:650;white-space:nowrap}.layout{display:grid;grid-template-columns:325px minmax(0,1fr);align-items:start;gap:13px}.panel{background:var(--paper);border:1px solid #e3eaf2;border-radius:17px;box-shadow:var(--shadow)}aside{padding:12px;max-height:calc(100vh - 80px);overflow-y:auto;scrollbar-width:thin}.group{border:1px solid #e6edf5;background:#fbfcfe;border-radius:12px;padding:11px;margin-bottom:10px}.group:last-child{margin-bottom:0}.group h2{font-size:13px;letter-spacing:.3px;text-transform:uppercase;margin:0 0 10px;font-weight:800;color:#475c75}.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.fields.three{grid-template-columns:repeat(3,minmax(0,1fr))}.fields>div{min-width:0}.field{display:flex;flex-direction:column;gap:3px}.field label,.field-label{font-size:12px;color:#5b6980;font-weight:650}.field input,.field select,.eqbox{height:36px;border:1px solid #d5e0ec;border-radius:8px;padding:7px 9px;color:#172638;background:white;min-width:0;width:100%;outline:0}.field input:focus,.field select:focus,.eqbox:focus{border-color:var(--blue);box-shadow:0 0 0 3px #2563eb20}.btnrow{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}.btnrow>*{flex:1;min-width:0}.btn{min-height:37px;padding:7px 9px;border:1px solid #d5dfeb;border-radius:9px;background:white;color:#274160;font-weight:700;transition:background .13s}.btn:hover:not(:disabled){background:#eff5fe}.btn.primary{color:#fff;background:#2563eb;border-color:#2563eb}.btn.primary:hover:not(:disabled){background:#1d4ed8}.btn.highlight{color:#155c4c;border-color:#8bc9b6;background:#ecfdf6}.btn.on{background:#dbeafe;border-color:#4380ef;color:#1747a2;box-shadow:inset 0 0 0 1px #4380ef}.btn.nudge{background:#fffbf1;border-color:#f2dfaf;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:66px;white-space:nowrap;font-size:14px;letter-spacing:-.15px;line-height:1.15;padding:8px 5px}.btn.nudge .nudge-icon{display:block;font-size:25px;line-height:1.05}.nudge-energy-field{width:126px;max-width:100%}.btn.nudge:hover:not(:disabled){background:#fff5dc;border-color:#ebc877}.hint{font-size:11.6px;color:var(--secondary);line-height:1.45;margin:8px 1px 0}.option{display:flex;align-items:center;gap:7px;font-size:12.4px;color:#45566a;cursor:pointer}.option input{accent-color:#2563eb;transform:scale(1.1)}.options{display:grid;grid-template-columns:1fr 1fr;gap:8px 4px}.options .wide{grid-column:span 2}.subline{border-top:1px solid #e5ebf4;margin:10px 0}details summary{cursor:pointer;font-weight:750;font-size:12px;color:#4f6481}.hidden{display:none!important}main{padding:14px;min-width:0}.topbar{display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-bottom:10px}.legend{display:flex;gap:15px;align-items:center;flex-wrap:wrap;color:#52637a;font-size:12px;font-weight:700}.legend span{display:flex;align-items:center;gap:6px}.lineicon{width:22px;height:0;border-top:3px solid #1f2d41}.lineicon.energy{border-top:3px dashed var(--green)}.lineicon.link{border-top:2px dashed #b4bfcc}.top-actions{display:flex;gap:7px}.top-actions button{min-height:32px;padding:6px 11px}.plot-wrap{border:1px solid #e0e9f2;border-radius:12px;background:linear-gradient(180deg,#fff,#fcfdff);overflow:hidden}.plot-wrap canvas{display:block;width:100%;height:auto;touch-action:none}.status{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 5px 0;color:#66758a;font-size:12px}.statbar{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-top:11px}.stat{background:#f8fafc;border:1px solid #e6edf3;border-radius:10px;padding:10px 6px 9px;text-align:center;min-width:0}.stat .name{color:#627389;font-size:11.5px;font-weight:700}.stat .number{font-size:21px;font-weight:800;letter-spacing:-.6px;font-variant-numeric:tabular-nums}.stat .unit{font-size:12px;color:#75849a;font-weight:650}.stat .number.energytext{color:#09865a}.foot{color:#75849a;font-size:11.8px;margin:10px 2px 1px;text-align:center}.msg{border-radius:8px;padding:7px 10px;background:#edf8f2;color:#17694c;font-size:12px;display:none;margin-top:8px}.msg.show{display:block}.field input.input-error{border-color:#dc5757;background:#fff8f7;box-shadow:0 0 0 2px #dc57571e}.hint-error{color:#bc3838!important;font-weight:650}.eq{margin-top:9px}.eqbox{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:13px}.control-block{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}.control-block span{color:#6c7b8e;font-size:11px}.flex-spacer{flex:1}@media(max-width:1050px){.layout{grid-template-columns:290px minmax(0,1fr)}.stat .number{font-size:18px}.stat .unit{font-size:10px}}@media(max-width:760px){.shell{padding:10px}.heading{align-items:flex-start}.header-key{display:none}.layout{display:flex;flex-direction:column-reverse}.layout>*{width:100%}aside{max-height:none}.statbar{grid-template-columns:repeat(3,1fr)}.heading h1{font-size:22px}}
+
+/* Compact display bar and full-width, centered graph-range toolbar. */
+.group{padding:10px;margin-bottom:8px}
+.group h2{margin-bottom:8px}
+.field input,.field select,.eqbox{height:35px}
+.btnrow{margin-top:7px}
+.btn.nudge{min-height:59px;padding:6px 5px;gap:2px}
+.display-strip{margin-top:8px;padding:9px 12px;background:#f7fafd;border:1px solid #e1e9f2;border-radius:11px}
+.display-strip-row{display:flex;align-items:center;gap:9px 13px;flex-wrap:wrap}
+.display-strip h2{margin:0;color:#4b6079;font-size:12px;letter-spacing:.45px;text-transform:uppercase;flex:none}
+.display-strip .options{display:flex;align-items:center;flex-wrap:wrap;gap:7px 15px;flex:1 1 530px}
+.display-strip .option{white-space:nowrap;font-size:12.5px;gap:5px}
+.display-strip .option input{margin:0}
+.range-toggle{flex:none;display:inline-flex;align-items:center;gap:6px;margin-left:auto;border:1px solid #d9e4f0;background:#fff;color:#3d5778;border-radius:8px;min-height:32px;padding:5px 10px;font-size:12px;font-weight:750;white-space:nowrap}
+.range-toggle:hover{background:#ecf3fd;border-color:#b9cde6}
+.range-toggle[aria-expanded="true"]{border-color:#aac5e8;background:#edf5ff}
+.range-chevron{font-size:12px;display:inline-block;transition:transform .15s ease}
+.range-toggle[aria-expanded="true"] .range-chevron{transform:rotate(180deg)}
+.range-editor-wrap{margin-top:9px;padding-top:10px;border-top:1px solid #e0e8f2}
+.range-editor{width:100%;max-width:1000px;margin:0 auto;display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) minmax(176px,1.5fr);gap:10px;align-items:end}
+.range-editor .field{min-width:0}
+.range-editor .field label{font-size:11.5px;white-space:nowrap}
+.range-editor .field input{height:34px}
+.range-actions{display:flex;gap:7px;min-width:0;align-items:center}
+.range-actions .btn{flex:1;min-width:0;min-height:34px;padding:6px 7px;font-size:11.5px;white-space:nowrap}
+.display-strip #notice{margin-top:8px}
+@media(max-width:1270px){
+  .range-editor{grid-template-columns:repeat(4,minmax(0,1fr));max-width:730px}
+  .range-actions{grid-column:1/-1;justify-content:center}
+  .range-actions .btn{flex:0 1 175px}
+}
+@media(max-width:800px){
+  .display-strip .options{flex-basis:100%;gap:9px 13px}
+  .range-toggle{margin-left:0}
+  .range-editor{grid-template-columns:repeat(2,minmax(0,1fr));max-width:490px}
+  .range-actions{grid-column:1/-1}
+  .range-actions .btn{flex:1}
+}
+
+/* Version 13 — stronger hierarchy, colored section names and classroom-readable data. */
+body {font-size:14.5px;line-height:1.4}
+.heading h1 {font-size:27px;font-weight:830;letter-spacing:-.65px}
+.layout {grid-template-columns:336px minmax(0,1fr);gap:14px}
+aside {padding:12px}
+.group {background:#fff;border:1px solid #e3eaf2;padding:11px;margin-bottom:10px;box-shadow:0 2px 8px rgba(28,53,82,.025)}
+.group.build-group {--sec:#126d87;--sec-bg:#e8f6fa;border-left:3px solid #1590ae}
+.group.initial-group {--sec:#344eb4;--sec-bg:#eef1ff;border-left:3px solid #596fe0}
+.group.nudge-group {--sec:#9b5c0b;--sec-bg:#fff2dd;border-left:3px solid #e3a441}
+.group h2 {display:flex;align-items:center;gap:9px;min-height:34px;margin:-2px -2px 12px;padding:6px 10px;border-radius:8px;color:var(--sec);background:var(--sec-bg);font-size:14.5px;font-weight:850;letter-spacing:.42px;text-transform:uppercase}
+.group h2::before {content:"";width:9px;height:9px;flex:none;border-radius:50%;background:var(--sec);box-shadow:0 0 0 3px rgba(255,255,255,.82)}
+.field label,.field-label {font-size:12.8px;color:#445a76;font-weight:760}
+.field input,.field select,.eqbox {font-size:14.5px;font-weight:570;height:37px}
+.btn {font-size:14px;font-weight:760;min-height:38px}
+.btn.nudge {font-size:15px;font-weight:780;min-height:65px}
+.btn.nudge .nudge-icon {font-size:27px}
+.option {font-size:13.2px;font-weight:620;color:#38516a}
+.legend {font-size:13.5px;font-weight:800;color:#415670}
+.lineicon {width:25px}
+.display-strip {background:#f8fafc;padding:10px 13px}
+.display-strip h2 {font-size:13px;font-weight:850;color:#334c6a;letter-spacing:.55px}
+.display-strip .option {font-size:13.2px;font-weight:670}
+.range-toggle {font-size:12.8px;font-weight:780}
+.statbar {gap:9px;margin-top:12px}
+.stat {background:linear-gradient(180deg,#ffffff,#f8fbff);border:1px solid #dce5ef;border-radius:11px;padding:12px 5px 11px;box-shadow:0 3px 10px rgba(35,62,94,.045)}
+.stat .name {font-size:12.7px;font-weight:820;color:#4b6180;letter-spacing:.08px;margin-bottom:2px}
+.stat .number {font-size:24px;font-weight:850;letter-spacing:-.65px;color:#162d4a}
+.stat .number.energytext {color:#05865b}
+.stat .unit {font-size:12.8px;color:#60748e;font-weight:770}
+.status {font-size:12.8px;font-weight:640}
+@media(max-width:1150px){.layout{grid-template-columns:315px minmax(0,1fr)}.stat .number{font-size:20px}.stat .name{font-size:11.7px}.stat .unit{font-size:11.5px}}
+@media(max-width:760px){.layout{display:flex;flex-direction:column-reverse}.heading h1{font-size:24px}.statbar{grid-template-columns:repeat(3,minmax(0,1fr))}.stat .number{font-size:23px}}
+
+/* Version 14: less blank space, larger more legible classroom typography. */
+body {font-size:16px;line-height:1.27}
+.shell {padding:11px 13px 15px}
+.heading {margin-bottom:8px}
+.heading h1 {font-size:29px;letter-spacing:-.65px}
+.layout {grid-template-columns:348px minmax(0,1fr);gap:11px}
+aside {padding:9px;max-height:calc(100vh - 59px)}
+.group {padding:9px;margin-bottom:7px;border-radius:11px}
+.group h2 {min-height:30px;margin:-2px -2px 8px;padding:4px 9px;font-size:16px;letter-spacing:.15px;gap:9px}
+.group h2::before {width:8px;height:8px}
+.field {gap:3px}
+.fields {gap:7px}
+.field label,.field-label {font-size:14.5px;font-weight:760;line-height:1.16}
+.field input,.field select,.eqbox {height:39px;padding:6px 9px;font-size:16px;font-weight:650;border-radius:7px}
+.btnrow {margin-top:7px;gap:6px}
+.btn {min-height:38px;padding:6px 8px;font-size:15.5px;font-weight:760;line-height:1.17}
+.btn.nudge {min-height:61px;font-size:16px;gap:2px;padding:5px 6px}
+.btn.nudge .nudge-icon {font-size:29px}
+.nudge-control-row {display:grid;grid-template-columns:94px minmax(0,1fr);gap:7px;align-items:end}
+.nudge-control-row .btnrow {margin-top:0;gap:5px;flex-wrap:nowrap}
+.nudge-control-row .btn.nudge {font-size:15px;padding:5px 3px;min-width:0;min-height:62px;white-space:normal}
+.nudge-control-row .btn.nudge .nudge-icon {font-size:27px}
+.nudge-energy-field {width:auto;min-width:0}
+.nudge-control-row .field input {height:40px}
+@media(max-width:330px){.nudge-control-row{grid-template-columns:1fr}.nudge-control-row .btnrow{margin-top:5px}}
+
+.option {font-size:14px;font-weight:650}
+.group .option {margin-top:7px!important}
+.group .fields[style] {margin-top:6px!important}
+.snap-row {margin-top:8px;padding-top:7px;border-top:1px solid #e6edf5}
+.eq {margin-top:6px}
+.hint {font-size:12.5px}
+main {padding:10px}
+.topbar {margin-bottom:7px}
+.legend {gap:13px;font-size:14.5px}
+.top-actions button {font-size:14px;min-height:32px}
+.display-strip {padding:8px 10px;margin-top:7px}
+.display-strip-row {gap:6px 11px}
+.display-strip h2 {font-size:14px;font-weight:850}
+.display-strip .options {gap:6px 14px}
+.display-strip .option {font-size:14px;font-weight:680;gap:6px}
+.display-strip .option input {transform:scale(1.13)}
+.range-toggle {min-height:31px;font-size:13.5px;padding:4px 8px}
+.range-editor-wrap {margin-top:7px;padding-top:8px}
+.range-editor {gap:7px}
+.range-editor .field label {font-size:13.5px}
+.range-editor .field input {height:36px}
+.range-actions .btn {font-size:13.5px}
+.status {padding:5px 3px 0;font-size:13.5px}
+.statbar {gap:6px;margin-top:6px}
+.stat {padding:6px 4px 7px;min-height:67px;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.stat .name {font-size:15px;font-weight:820;line-height:1.15;letter-spacing:0;margin:0;white-space:nowrap}
+.stat .reading {display:flex;align-items:baseline;justify-content:center;gap:4px;line-height:1.05;white-space:nowrap;max-width:100%}
+.stat .number {font-size:29px;font-weight:850;letter-spacing:-.7px}
+.stat .unit {font-size:15px;font-weight:760;color:#52677f}
+@media(max-width:1210px){
+ .layout {grid-template-columns:326px minmax(0,1fr)}
+ .stat .name {font-size:13px}
+ .stat .number {font-size:23px}
+ .stat .unit {font-size:12.5px}
+}
+@media(max-width:1050px){
+ .layout {grid-template-columns:315px minmax(0,1fr)}
+ .statbar {grid-template-columns:repeat(3,minmax(0,1fr))}
+ .stat .name {font-size:14px}
+ .stat .number {font-size:26px}
+ .stat .unit {font-size:14px}
+}
+@media(max-width:760px){
+ .layout {display:flex;flex-direction:column-reverse}
+ aside {max-height:none}
+ .heading h1 {font-size:25px}
+ .statbar {grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:470px){
+ .stat .name {font-size:12.5px}
+ .stat .number {font-size:23px}
+ .stat .unit {font-size:12px}
+ .display-strip .option {font-size:13.5px}
+}
+
+/* Keep the range control aligned with the Display heading on smaller screens. */
+@media(max-width:1150px){
+ .display-strip-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px 8px}
+ .display-strip h2{grid-column:1;grid-row:1;align-self:center}
+ .display-strip .options{grid-column:1 / -1;grid-row:2;flex-basis:auto;gap:6px 13px}
+ .range-toggle{grid-column:2;grid-row:1;margin-left:0;justify-self:end}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+<header class="heading"><h1>Potential Energy Explorer</h1></header>
+<div class="layout">
+<aside class="panel">
+<section class="group build-group"><h2>Build the Potential</h2>
+ <div class="field"><label for="buildMode">Curve definition</label><select id="buildMode"><option value="points">Registration points</option><option value="equation">Enter an equation</option></select></div>
+ <div id="pointTools">
+  <div class="btnrow"><button class="btn" id="addPoint">＋ Add points: OFF</button><button class="btn" id="deletePoint" title="Select a point to delete it">Delete point</button></div>
+  <div class="btnrow"><button class="btn" id="sampleCurve">↺ Sample curve</button><button class="btn" id="clearCurve">Clear</button></div>
+ </div>
+ <div id="eqTools" class="hidden"><div class="eq"><label class="field-label" for="equation">U(x) in joules</label><input class="eqbox" id="equation" spellcheck="false" value="0.12*(x-2)^2*(x-7)^2+1" /></div><div class="btnrow"><button id="applyEquation" class="btn primary">Plot equation</button></div></div>
+</section>
+<section class="group initial-group"><h2>Initial Conditions</h2>
+ <div class="fields three">
+  <div class="field"><label for="x0">x₀ (m)</label><input type="number" id="x0" value="1.20" step="0.1"></div>
+  <div class="field"><label for="initialKE">KE₀ (J)</label><input type="number" id="initialKE" value="0" min="0" step="0.1"></div>
+  <div class="field"><label for="mass">m (kg)</label><input type="number" id="mass" value="1" min="0.01" step="0.1"></div>
+ </div>
+ <div class="fields" style="margin-top:8px">
+  <div class="field"><label for="direction">Initial velocity</label><select id="direction"><option value="1">→ Right</option><option value="-1">← Left</option></select></div>
+  <div class="field"><label for="speed">Playback speed</label><select id="speed"><option value="0.25">¼×</option><option value="0.5">½×</option><option value="1" selected>1×</option><option value="1.5">1½×</option><option value="2">2×</option></select></div>
+ </div>
+ <div class="btnrow"><button id="play" class="btn primary">▶ Play</button><button id="reset" class="btn">↺ Reset</button></div>
+ <div class="btnrow snap-row"><button id="snapNearest" class="btn highlight">◎ Snap to nearest equilibrium</button></div>
+ <label class="option" style="margin-top:8px"><input type="checkbox" id="snapDrag"> Snap to equilibria while dragging</label>
+</section>
+<section class="group nudge-group"><h2>Nudge</h2>
+ <div class="nudge-control-row">
+  <div class="field nudge-energy-field"><label for="deltaE">ΔE (J)</label><input type="number" id="deltaE" value="0.50" min="0.01" step="0.01" aria-describedby="deltaEHelp"></div>
+  <div class="btnrow"><button id="nudgeLeft" class="btn nudge" aria-label="Nudge left"><span class="nudge-icon" aria-hidden="true">👈</span><span>Nudge left</span></button><button id="nudgeRight" class="btn nudge" aria-label="Nudge right"><span class="nudge-icon" aria-hidden="true">👉</span><span>Nudge right</span></button></div>
+ </div>
+ <span id="deltaEHelp" class="hint hint-error hidden" role="alert">Nudge energy must be greater than zero (minimum 0.01 J).</span>
+</section>
+
+</aside>
+<main class="panel">
+ <div class="topbar"><div class="legend"><span><i class="lineicon"></i> U(x)</span><span><i class="lineicon energy"></i> E</span><span><i class="lineicon link"></i> Same position</span></div><div class="top-actions"><button class="btn" id="fitTop" title="Fit curve and energy into view">⤢ Fit view</button></div></div>
+ <div class="plot-wrap"><canvas id="plot" width="1100" height="618" aria-label="Potential energy graph with a marble on the curve and an aligned block on the x-axis"></canvas></div>
+ <section class="display-strip" aria-label="Display controls">
+  <div class="display-strip-row">
+    <h2>Display</h2>
+    <div class="options">
+      <label class="option"><input type="checkbox" id="showMarble" checked> Marble on curve</label>
+      <label class="option"><input type="checkbox" id="showEnergy" checked> Total energy E</label>
+      <label class="option"><input type="checkbox" id="showForce"> Force arrow</label>
+      <label class="option"><input type="checkbox" id="showKE"> KE</label>
+      <label class="option"><input type="checkbox" id="showEquilibria"> Equilibria</label>
+      <label class="option"><input type="checkbox" id="showGrid"> Grid</label>
+    </div>
+    <button class="range-toggle" type="button" id="toggleRange" aria-expanded="false" aria-controls="rangeEditor"><span class="range-chevron">▾</span> Graph range</button>
+  </div>
+  <div id="rangeEditor" class="range-editor-wrap hidden">
+    <div class="range-editor">
+      <div class="field"><label for="xmin">x min (m)</label><input id="xmin" type="number" value="0" step="0.5"></div>
+      <div class="field"><label for="xmax">x max (m)</label><input id="xmax" type="number" value="10" step="0.5"></div>
+      <div class="field"><label for="umin">U min (J)</label><input id="umin" type="number" value="-1" step="1"></div>
+      <div class="field"><label for="umax">U max (J)</label><input id="umax" type="number" value="11" step="1"></div>
+      <div class="range-actions"><button class="btn" id="applyAxes">Apply range</button><button class="btn" id="fitAxes">Fit U and E</button></div>
+    </div>
+  </div>
+  <div id="notice" class="msg" role="status"></div>
+ </section>
+ <div class="status"><span id="statusText">Paused</span><span id="eqStatus">—</span></div>
+ <div class="statbar">
+  <div class="stat"><div class="name">Position, x</div><div class="reading"><span id="xRead" class="number">1.20</span><span class="unit">m</span></div></div>
+  <div class="stat"><div class="name">Velocity, v</div><div class="reading"><span id="vRead" class="number">0.00</span><span class="unit">m/s</span></div></div>
+  <div class="stat"><div class="name">Acceleration, a</div><div class="reading"><span id="aRead" class="number">0.00</span><span class="unit">m/s²</span></div></div>
+  <div class="stat"><div class="name">Potential, U</div><div class="reading"><span id="uRead" class="number">0.00</span><span class="unit">J</span></div></div>
+  <div class="stat"><div class="name">Kinetic, KE</div><div class="reading"><span id="keRead" class="number">0.00</span><span class="unit">J</span></div></div>
+  <div class="stat"><div class="name">Total, E</div><div class="reading"><span id="eRead" class="number energytext">0.00</span><span class="unit">J</span></div></div>
+ </div>
+</main>
+</div></div>
+<script>
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id), canvas=$('plot'), c=canvas.getContext('2d');
+const W=1100,H=618,box={left:86,right:1031,top:76,bottom:475},trackY=574;
+const state={mode:'points',adding:false,points:[],selected:null,drag:null,playing:false,t0:null,view:{xmin:0,xmax:10,umin:-1,umax:11},m:1,x:1.2,v:0,E:0,acc:0,eqFn:null,expression:'',nudge:null,eqs:[],msgTimeout:null,hover:null};
+const sample=[{x:0.18,u:8.7},{x:1.20,u:4.1},{x:2.35,u:1.05},{x:5.12,u:5.55},{x:7.35,u:2.36},{x:9.7,u:9.4}];
+function clamp(x,a,b){return Math.max(a,Math.min(b,x));}
+function num(id,fallback){let v=Number($(id).value);return Number.isFinite(v)?v:fallback;}
+function fmt(x){if(!Number.isFinite(x))return '—';if(Math.abs(x)<.005)return '0.00';return x.toFixed(2);}
+function msg(text){const node=$('notice');node.textContent=text;node.classList.add('show');clearTimeout(state.msgTimeout);state.msgTimeout=setTimeout(()=>node.classList.remove('show'),3200);}
+function sortPts(){state.points.sort((a,b)=>a.x-b.x);}
+function slopes(){const pts=state.points,n=pts.length,ms=new Array(n).fill(0);if(n<2)return ms;const delta=[],h=[];for(let i=0;i<n-1;i++){h.push(Math.max(.0001,pts[i+1].x-pts[i].x));delta.push((pts[i+1].u-pts[i].u)/h[i]);}if(n===2)return [delta[0],delta[0]];
+function endpoint(h0,h1,d0,d1){let m=((2*h0+h1)*d0-h0*d1)/(h0+h1);if(Math.sign(m)!==Math.sign(d0))m=0;else if(Math.sign(d0)!==Math.sign(d1)&&Math.abs(m)>3*Math.abs(d0))m=3*d0;return m;}
+ms[0]=endpoint(h[0],h[1],delta[0],delta[1]);ms[n-1]=endpoint(h[n-2],h[n-3],delta[n-2],delta[n-3]);for(let i=1;i<n-1;i++){if(delta[i-1]*delta[i]<=0){ms[i]=0;}else{const w1=2*h[i]+h[i-1],w2=h[i]+2*h[i-1];ms[i]=(w1+w2)/(w1/delta[i-1]+w2/delta[i]);}}return ms;}
+let curveCache={valid:false,ms:[]};function invalidate(){curveCache.valid=false;}
+function uPoint(x){let p=state.points,n=p.length;if(!n)return 0;if(n===1)return p[0].u;if(!curveCache.valid){curveCache.ms=slopes();curveCache.valid=true;}let ms=curveCache.ms;let i;if(x<=p[0].x)i=0;else if(x>=p[n-1].x)i=n-2;else{let lo=0,hi=n-1;while(hi-lo>1){const m=(lo+hi)>>1;if(x<p[m].x)hi=m;else lo=m;}i=lo;}
+const left=p[i],right=p[i+1],h=right.x-left.x,t=(x-left.x)/h;
+if(x<left.x)return left.u+ms[i]*(x-left.x);if(x>right.x)return right.u+ms[i+1]*(x-right.x);
+return(2*t*t*t-3*t*t+1)*left.u+(t*t*t-2*t*t+t)*h*ms[i]+(-2*t*t*t+3*t*t)*right.u+(t*t*t-t*t)*h*ms[i+1];}
+function dPoint(x){const p=state.points,n=p.length;if(n<2)return 0;if(!curveCache.valid){curveCache.ms=slopes();curveCache.valid=true;}const ms=curveCache.ms;let i;if(x<=p[0].x)return ms[0];if(x>=p[n-1].x)return ms[n-1];let lo=0,hi=n-1;while(hi-lo>1){const m=(lo+hi)>>1;if(x<p[m].x)hi=m;else lo=m;}i=lo;const a=p[i],b=p[i+1],h=b.x-a.x,t=(x-a.x)/h;return ((6*t*t-6*t)*a.u+ (3*t*t-4*t+1)*h*ms[i]+(-6*t*t+6*t)*b.u+(3*t*t-2*t)*h*ms[i+1])/h;}
+function compile(s){const input=s.replace(/\^/g,'**').trim();if(!/^[\d\w.\s+*/(),\-]*$/.test(input))throw Error('Use only numbers, x, operators, parentheses and standard functions.');const allowed=new Set(['x','sin','cos','tan','asin','acos','atan','sqrt','abs','exp','log','log10','pow','min','max','floor','ceil','round','PI','E']);const ids=input.match(/[a-zA-Z_][a-zA-Z_0-9]*/g)||[];for(const id of ids){if(!allowed.has(id))throw Error('Unrecognized symbol: '+id);}const f=new Function('x','"use strict";const {sin,cos,tan,asin,acos,atan,sqrt,abs,exp,log,log10,pow,min,max,floor,ceil,round,PI,E}=Math;return ('+input+');');for(let k=0;k<8;k++){const v=f(state.view.xmin+(state.view.xmax-state.view.xmin)*(k+.35)/8);if(!Number.isFinite(v))throw Error('The equation has undefined values in the plotted range.');}return f;}
+function U(x){try{const v=state.mode==='equation'&&state.eqFn?state.eqFn(x):uPoint(x);return Number.isFinite(v)?v:NaN;}catch{return NaN;}}
+function F(x){if(state.mode==='points')return-dPoint(x);const span=state.view.xmax-state.view.xmin,h=1e-4*span;return-(U(x+h)-U(x-h))/(2*h);}
+function projectX(x){return box.left+(x-state.view.xmin)/(state.view.xmax-state.view.xmin)*(box.right-box.left);}
+function projectY(u){return box.bottom-(u-state.view.umin)/(state.view.umax-state.view.umin)*(box.bottom-box.top);}
+function unprojectX(sx){return state.view.xmin+(sx-box.left)/(box.right-box.left)*(state.view.xmax-state.view.xmin);}
+function unprojectU(sy){return state.view.umin+(box.bottom-sy)/(box.bottom-box.top)*(state.view.umax-state.view.umin);}
+function roots(){
+ const result=[],min=state.view.xmin,max=state.view.xmax;
+ // A shape-preserving Hermite curve has its isolated extrema exactly at
+ // registration points whose neighboring secant slopes change sign.
+ if(state.mode==='points'){
+   const p=state.points;
+   for(let i=1;i<p.length-1;i++){
+     const d1=p[i].u-p[i-1].u,d2=p[i+1].u-p[i].u;
+     if(d1<0&&d2>0)result.push({x:p[i].x,kind:'stable'});
+     else if(d1>0&&d2<0)result.push({x:p[i].x,kind:'unstable'});
+   }
+   return result.filter(v=>v.x>=min&&v.x<=max);
+ }
+ const N=900,step=(max-min)/N;
+ let lastx=min,lastF=F(min);
+ for(let i=1;i<=N;i++){
+   const x=min+i*step,fx=F(x);
+   if(Number.isFinite(fx)&&Number.isFinite(lastF)&&((fx>0&&lastF<0)||(fx<0&&lastF>0))){
+     let a=lastx,b=x,fa=lastF;
+     for(let j=0;j<42;j++){
+       const mid=(a+b)/2,fm=F(mid);
+       if(!Number.isFinite(fm))break;
+       if((fa<=0&&fm<=0)||(fa>=0&&fm>=0)){a=mid;fa=fm;}else b=mid;
+     }
+     const root=(a+b)/2;
+     if(result.every(v=>Math.abs(v.x-root)>step*1.5)){
+       const delta=step*.8,u=U(root),left=U(root-delta),right=U(root+delta);
+       const kind=u<left&&u<right?'stable':u>left&&u>right?'unstable':'neutral';
+       result.push({x:root,kind});
+     }
+   }
+   lastx=x;lastF=fx;
+ }
+ return result;
+}
+function updateEquilibria(){state.eqs=roots();}
+function outsideView(){return state.x<state.view.xmin?'left':state.x>state.view.xmax?'right':null;}
+function syncPlay(){
+ $('play').textContent=state.playing?'Ⅱ Pause':'▶ Play';
+ const side=outsideView();
+ $('statusText').textContent=state.nudge?'Nudging':state.playing?(side?`Playing · beyond ${side} edge of graph`:'Playing'):(side?`Paused · beyond ${side} edge of graph`:'Paused');
+}
+function stop(){state.playing=false;state.t0=null;syncPlay();}
+function setAt(x,ke){state.x=clamp(x,state.view.xmin,state.view.xmax);let K=Math.max(0,ke),dir=num('direction',1);state.m=Math.max(.01,num('mass',1));state.v=dir*Math.sqrt(2*K/state.m);state.acc=F(state.x)/state.m;state.E=U(state.x)+K;updateStats();}
+function reset(){state.nudge=null;stop();setAt(num('x0',1.2),num('initialKE',0));fitEnergyIfNeeded();draw();}
+function updateStats(){const k=.5*state.m*state.v*state.v; $('xRead').textContent=fmt(state.x);$('vRead').textContent=fmt(state.v);$('aRead').textContent=fmt(state.acc);$('uRead').textContent=fmt(U(state.x));$('keRead').textContent=fmt(k);$('eRead').textContent=fmt(state.E);let near=state.eqs.find(e=>Math.abs(e.x-state.x)<.015);$('eqStatus').textContent=near?`${near.kind[0].toUpperCase()+near.kind.slice(1)} equilibrium at x = ${fmt(near.x)} m`:' ';}
+function fitEnergyIfNeeded(){if(state.E>state.view.umax-.3){state.view.umax=state.E+Math.max(1,(state.view.umax-state.view.umin)*.10);$('umax').value=Number(state.view.umax.toFixed(2));}}
+function fit(){let lo=Infinity,hi=-Infinity;for(let i=0;i<=800;i++){let x=state.view.xmin+(state.view.xmax-state.view.xmin)*i/800;let val=U(x);if(Number.isFinite(val)){lo=Math.min(lo,val);hi=Math.max(hi,val);}}if(!Number.isFinite(lo)){lo=0;hi=10;}hi=Math.max(hi,state.E);const pad=Math.max(0.75,(hi-lo)*.12);state.view.umin=lo-pad;state.view.umax=hi+pad;$('umin').value=Number(state.view.umin.toFixed(2));$('umax').value=Number(state.view.umax.toFixed(2));draw();}
+function refreshMode(){state.mode=$('buildMode').value;state.adding=false;$('pointTools').classList.toggle('hidden',state.mode!=='points');$('eqTools').classList.toggle('hidden',state.mode!=='equation');refreshAddButton();updateEquilibria();reset();}
+function refreshAddButton(){const b=$('addPoint');b.textContent=state.adding?'✓ Add points: ON':'＋ Add points: OFF';b.classList.toggle('on',state.adding);canvas.style.cursor=state.adding?'crosshair':'default';}
+function rounded(x,y,w,h,r,fill,stroke){c.beginPath();c.roundRect(x,y,w,h,r);if(fill){c.fillStyle=fill;c.fill();}if(stroke){c.strokeStyle=stroke;c.stroke();}}
+function text(txt,x,y,size=15,color='#203047',weight=500){c.fillStyle=color;c.font=`${weight} ${size}px system-ui, sans-serif`;c.fillText(txt,x,y);}
+function line(x1,y1,x2,y2,color,width=1,dash=[]){c.save();c.beginPath();c.setLineDash(dash);c.strokeStyle=color;c.lineWidth=width;c.moveTo(x1,y1);c.lineTo(x2,y2);c.stroke();c.restore();}
+function drawArrow(x1,y1,x2,y2,color,width=4){if(Math.abs(x2-x1)<1)return;line(x1,y1,x2,y2,color,width);const d=x2>x1?1:-1;c.fillStyle=color;c.beginPath();c.moveTo(x2,y2);c.lineTo(x2-d*11,y2-6);c.lineTo(x2-d*11,y2+6);c.closePath();c.fill();}
+function grid(){const xstep=(state.view.xmax-state.view.xmin)/10,ustep=(state.view.umax-state.view.umin)/8;for(let i=0;i<=10;i++){const x=projectX(state.view.xmin+i*xstep);line(x,box.top,x,box.bottom,'#e7edf4',1);}for(let i=0;i<=8;i++){const y=projectY(state.view.umin+i*ustep);line(box.left,y,box.right,y,'#e7edf4',1);}}
+function plotCurve(){c.save();c.beginPath();c.rect(box.left,box.top,box.right-box.left,box.bottom-box.top);c.clip();c.beginPath();let started=false;for(let i=0;i<=1050;i++){const x=state.view.xmin+(state.view.xmax-state.view.xmin)*i/1050,p=projectY(U(x));if(!Number.isFinite(p)){started=false;continue;}if(!started){c.moveTo(projectX(x),p);started=true;}else c.lineTo(projectX(x),p);}c.strokeStyle='#213047';c.lineWidth=4;c.lineJoin='round';c.lineCap='round';c.stroke();c.restore();}
+// Position of the hand through a single push: approach, touch, pull away.
+// The block/marble do not carry the hand with them after impact.
+function nudgeProgress(age){
+ const smooth=t=>{t=clamp(t,0,1);return t*t*(3-2*t);};
+ if(age<.38)return smooth(age/.38);
+ if(age<.42)return 1;
+ return 1-smooth((age-.42)/.58);
+}
+// Draw an oversized, browser-independent pointing hand.
+// The fingertip approaches the horizontal CENTER of the object and stops
+// at the physical edge (r = marble radius or half the block width).
+function drawHand(cx,cy,direction,progress,radius){
+ const gap=(1-progress)*96;
+ const tipX=cx-direction*(radius+gap);
+ c.save();c.translate(tipX,cy);c.scale(direction,1);
+ c.shadowColor='rgba(30,47,65,.18)';c.shadowBlur=9;c.shadowOffsetY=3;
+ // Jacket cuff and sleeve, trailing the extended index finger
+ rounded(-130,-21,39,44,9,'#396aab','#22436e');
+ rounded(-99,-25,21,50,8,'#e4f0fe','#29496d');
+ c.lineWidth=2.25;c.strokeStyle='#8a5037';c.fillStyle='#f8c89b';
+ // Main hand and outstretched index finger; tip is exactly at local x=0,y=0.
+ c.beginPath();c.moveTo(-87,-19);
+ c.bezierCurveTo(-72,-29,-55,-25,-46,-16);
+ c.bezierCurveTo(-40,-11,-31,-9,-22,-9);
+ c.lineTo(-10,-9);c.bezierCurveTo(4,-9,4,9,-10,9);
+ c.lineTo(-38,9);c.bezierCurveTo(-31,15,-34,22,-45,25);
+ c.bezierCurveTo(-56,29,-77,23,-88,18);c.closePath();c.fill();c.stroke();
+ // Curled fingers and thumb (details deliberately restrained)
+ c.beginPath();c.moveTo(-46,10);c.quadraticCurveTo(-34,17,-44,21);
+ c.moveTo(-60,10);c.quadraticCurveTo(-48,19,-57,23);
+ c.moveTo(-72,7);c.quadraticCurveTo(-67,17,-70,21);
+ c.strokeStyle='#bf7954';c.lineWidth=1.7;c.stroke();
+ // Highlight of the fingertip visually sits on the object center line
+ c.beginPath();c.moveTo(-19,-5);c.quadraticCurveTo(-11,-6,-5,-3);c.strokeStyle='#ffe3c3';c.lineWidth=2;c.stroke();
+ c.restore();
+}
+// Equilibria: understated location guides, with labeled extrema on the curve.
+function drawEquilibriumGuides(){
+ if(!$('showEquilibria').checked)return;
+ c.save();c.beginPath();c.rect(box.left,box.top,box.right-box.left,box.bottom-box.top);c.clip();
+ for(const eq of state.eqs){
+   const ex=projectX(eq.x),ey=projectY(U(eq.x));
+   if(!Number.isFinite(ex)||!Number.isFinite(ey))continue;
+   const stable=eq.kind==='stable',unstable=eq.kind==='unstable';
+   const color=stable?'#188671':unstable?'#c27b29':'#73869b';
+   // A narrow translucent lane connects the extremum with its x-coordinate.
+   const gradient=c.createLinearGradient(ex-18,0,ex+18,0);
+   gradient.addColorStop(0,'rgba(255,255,255,0)');
+   gradient.addColorStop(.5,stable?'rgba(24,134,113,.095)':unstable?'rgba(194,123,41,.095)':'rgba(115,134,155,.09)');
+   gradient.addColorStop(1,'rgba(255,255,255,0)');
+   c.fillStyle=gradient;c.fillRect(ex-18,Math.min(ey,box.bottom),36,Math.abs(box.bottom-ey));
+   line(ex,ey+13,ex,box.bottom,color+'88',1.45,[5,5]);
+ }
+ c.restore();
+}
+function drawEquilibriumMarkers(){
+ if(!$('showEquilibria').checked)return;
+ c.save();
+ for(const eq of state.eqs){
+   const ex=projectX(eq.x),ey=projectY(U(eq.x));
+   if(!Number.isFinite(ex)||!Number.isFinite(ey)||ey<box.top-20||ey>box.bottom+20)continue;
+   const stable=eq.kind==='stable',unstable=eq.kind==='unstable';
+   const color=stable?'#15846f':unstable?'#c07b2a':'#7b8c9f';
+   const fill=stable?'#e7f7f2':unstable?'#fff4e6':'#eef2f7';
+   const label=stable?'STABLE':unstable?'UNSTABLE':'EQUILIBRIUM';
+   // Light halo and ring leave the control point itself visible.
+   c.beginPath();c.arc(ex,ey,17,0,Math.PI*2);c.fillStyle=stable?'rgba(24,134,113,.12)':unstable?'rgba(194,123,41,.14)':'rgba(115,134,155,.12)';c.fill();
+   c.beginPath();c.arc(ex,ey,10.5,0,Math.PI*2);c.lineWidth=2.4;c.strokeStyle=color;c.stroke();
+   // Identify stability without a large label or a permanent vertical banner.
+   c.font='800 11px system-ui,sans-serif';
+   const tw=c.measureText(label).width,pw=tw+35,ph=24;
+   let left=clamp(ex-pw/2,box.left+4,box.right-pw-4);
+   let top=stable?ey+25:ey-55;
+   top=clamp(top,box.top+5,box.bottom-ph-6);
+   rounded(left,top,pw,ph,12,fill,color+'66');
+   c.beginPath();c.arc(left+13,top+ph/2,4,0,Math.PI*2);c.fillStyle=color;c.fill();
+   text(label,left+23,top+16,11,color,800);
+   // A small colored notch at the axis locates the precise equilibrium x.
+   c.beginPath();c.moveTo(ex-4.5,box.bottom-1);c.lineTo(ex+4.5,box.bottom-1);c.lineTo(ex,box.bottom+5.5);c.closePath();c.fillStyle=color;c.fill();
+ }
+ c.restore();
+}
+function draw(){const s=state.view;c.clearRect(0,0,W,H);c.fillStyle='#ffffff';c.fillRect(0,0,W,H);
+// top plot field
+rounded(box.left,box.top,box.right-box.left,box.bottom-box.top,4,'#fbfdff');
+if($('showGrid').checked)grid();
+drawEquilibriumGuides();
+text('POTENTIAL ENERGY',box.left,36,19,'#425c7a',850);text('U (J)',box.left-63,box.top-13,20,'#1e2f47',800);text('x (m)',box.right+8,box.bottom+6,20,'#1e2f47',800);
+line(box.left,box.top,box.left,box.bottom,'#6c7e93',1.6);line(box.left,box.bottom,box.right,box.bottom,'#6c7e93',1.6);
+c.save();c.font='700 15px system-ui';c.fillStyle='#526882';c.textAlign='center';for(let i=0;i<=10;i++){let x=state.view.xmin+(state.view.xmax-state.view.xmin)*i/10;let sx=projectX(x);line(sx,box.bottom,sx,box.bottom+5,'#9eacba');c.fillText(Number(x.toFixed(2)).toString(),sx,box.bottom+19);}c.textAlign='right';for(let i=0;i<=5;i++){const u=state.view.umin+(state.view.umax-state.view.umin)*i/5,y=projectY(u);line(box.left-5,y,box.left,y,'#9eacba');c.fillText(Number(u.toFixed(1)).toString(),box.left-10,y+4);}c.restore();
+const px=projectX(state.x),pu=projectY(U(state.x));
+// Total E and vertical KE segment
+const eY=projectY(state.E);if($('showEnergy').checked&&Number.isFinite(eY)){line(box.left,eY,box.right,eY,'#0a9061',2.8,[11,6]);text('E',box.right-20,Math.max(box.top+17,eY-10),22,'#008252',850);}
+// Keep the position guide inside the visible graph. The plot boundaries are
+// viewport limits, NOT physical walls; the particle may move beyond them.
+if(!outsideView()&&Number.isFinite(pu))line(px,Math.min(box.bottom,Math.max(box.top,pu)),px,trackY-27,'#abbacb',1.8,[5,6]);
+plotCurve();
+// The KE segment shares the marble's EXACT horizontal coordinate.
+// Its endpoints are E and U(x), so the vertical length represents KE = E - U.
+if($('showKE').checked&&!outsideView()){
+ const localU=U(state.x),delta=state.E-localU,yE=projectY(state.E),yU=projectY(localU);
+ if(Number.isFinite(delta)&&delta>1e-9&&Number.isFinite(yE)&&Number.isFinite(yU)
+     &&yE>=box.top&&yE<=box.bottom&&yU>=box.top&&yU<=box.bottom){
+   // No horizontal offset or leader lines: the indicator sits directly above the block.
+   line(px,yE,px,yU,'#de9825',3.5);
+   line(px-7,yE,px+7,yE,'#de9825',2.5);
+   line(px-7,yU,px+7,yU,'#de9825',2.5);
+   const label=`KE = ${fmt(delta)} J`;
+   c.save();c.font='800 13px system-ui,sans-serif';
+   const labelWidth=c.measureText(label).width;
+   // Only the label is offset so that it doesn't cover the marble or indicator.
+   const rightRoom=box.right-px, leftRoom=px-box.left;
+   let tx=rightRoom>=labelWidth+22||rightRoom>=leftRoom?px+12:px-labelWidth-12;
+   tx=clamp(tx,box.left+4,box.right-labelWidth-4);
+   text(label,tx,Math.min(box.bottom-5,Math.max(box.top+15,(yE+yU)/2+4)),13,'#a46b12',800);
+   c.restore();
+ }
+}
+// registration points
+if(state.mode==='points'){state.points.forEach(p=>{const x=projectX(p.x),y=projectY(p.u);c.beginPath();c.arc(x,y,p===state.selected?5.2:3.8,0,Math.PI*2);c.fillStyle=p===state.selected?'#1d4ed8':'#e7f0ff';c.fill();c.lineWidth=2;c.strokeStyle='#3573ca';c.stroke();});}
+// Clearly identify stable and unstable equilibria, without covering the curve.
+drawEquilibriumMarkers();
+// The marble is clipped to the graph's x window, so it exits the view
+// smoothly rather than bouncing off an invisible wall.
+c.save();c.beginPath();c.rect(box.left,box.top-24,box.right-box.left,box.bottom-box.top+48);c.clip();
+if($('showMarble').checked&&Number.isFinite(pu)){const r=13,g=c.createRadialGradient(px-4,pu-18,1,px,pu-12,r);g.addColorStop(0,'#e6f5ff');g.addColorStop(.35,'#7eb7ff');g.addColorStop(1,'#2563d5');c.beginPath();c.arc(px,pu-12,r,0,Math.PI*2);c.fillStyle=g;c.fill();c.strokeStyle='#1f4a91';c.lineWidth=1.4;c.stroke();}
+// The hand is anchored at the PRE-NUDGE position, not the moving marble.
+// One quick strike and withdrawal: it never follows the marble after contact.
+if(state.nudge&&$('showMarble').checked&&Number.isFinite(state.nudge.startU)){
+ const n=state.nudge;
+ drawHand(projectX(n.startX),projectY(n.startU)-12,n.dir,nudgeProgress(n.age),13);
+}
+c.restore();
+// track title and rail
+line(box.left,trackY,box.right,trackY,'#8292a6',3);
+for(let i=0;i<=20;i++){const x=box.left+(box.right-box.left)*i/20;line(x,trackY-5,x,trackY+6,'#95a6bb',1.2);}
+text('x (m)',box.right+8,trackY+6,20,'#1e2f47',800);
+// The physical block likewise slides past the view edge without reflection.
+const bx=px,by=trackY-31;
+c.save();c.beginPath();c.rect(box.left,trackY-90,box.right-box.left,100);c.clip();
+rounded(bx-17,by-16,34,32,5,'#dc5351','#a42f34');c.fillStyle='#f48785';c.fillRect(bx-11,by-12,21,4);line(bx-16,by+13,bx+16,by+13,'#ad393a',1.5);
+if($('showForce').checked){let f=F(state.x),L=Math.min(94,Math.abs(f)*7),d=Math.sign(f);if(Number.isFinite(L)&&L>5)drawArrow(bx,by-24,bx+d*L,by-24,'#8658d1',3.4);}
+// The block receives the same brief, stationary strike at its original position.
+if(state.nudge){const n=state.nudge;drawHand(projectX(n.startX),by,n.dir,nudgeProgress(n.age),17);}
+c.restore();
+}
+function pointerPos(e){const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height};}
+function hitPoint(x,y){if(state.mode!=='points')return null;let target=null,best=14**2;for(const p of state.points){const d=(x-projectX(p.x))**2+(y-projectY(p.u))**2;if(d<best){best=d;target=p;}}return target;}
+function snapPosition(x,force=false){if(!state.eqs.length)return x;const nearest=state.eqs.reduce((a,b)=>Math.abs(b.x-x)<Math.abs(a.x-x)?b:a);const distance=Math.abs(nearest.x-x);return force||distance<(state.view.xmax-state.view.xmin)*.025?nearest.x:x;}
+function dragBlockAt(mx){let x=clamp(unprojectX(mx),state.view.xmin,state.view.xmax);if($('snapDrag').checked)x=snapPosition(x);$('x0').value=Number(x.toFixed(5));setAt(x,num('initialKE',0));fitEnergyIfNeeded();draw();}
+canvas.addEventListener('pointerdown',e=>{const p=pointerPos(e);if(state.playing||state.nudge)return;if(Math.abs(p.y-(trackY-31))<27&&Math.abs(p.x-projectX(state.x))<30){state.drag={type:'block'};canvas.setPointerCapture(e.pointerId);dragBlockAt(p.x);return;}
+const point=hitPoint(p.x,p.y);if(point){state.selected=point;state.drag={type:'point',point};canvas.setPointerCapture(e.pointerId);draw();return;}
+if(state.mode==='points'&&state.adding&&p.x>=box.left&&p.x<=box.right&&p.y>=box.top&&p.y<=box.bottom){const x=unprojectX(p.x),u=unprojectU(p.y);if(state.points.some(a=>Math.abs(a.x-x)<(state.view.xmax-state.view.xmin)*.012)){msg('A registration point is too close to that x-coordinate.');return;}const np={x,u};state.points.push(np);sortPts();invalidate();state.selected=np;updateEquilibria();reset();draw();}}
+);
+canvas.addEventListener('pointermove',e=>{let p=pointerPos(e);if(!state.drag){const hit=hitPoint(p.x,p.y);canvas.style.cursor=hit?'grab':(Math.abs(p.y-(trackY-31))<28&&Math.abs(p.x-projectX(state.x))<27?'grab':state.adding?'crosshair':'default');return;}if(state.drag.type==='block'){dragBlockAt(p.x);}else if(state.drag.type==='point'){const pt=state.drag.point,idx=state.points.indexOf(pt),left=state.points[idx-1]?.x??(state.view.xmin-.10),right=state.points[idx+1]?.x??(state.view.xmax+.10);pt.x=clamp(unprojectX(p.x),Math.max(state.view.xmin,left+.07),Math.min(state.view.xmax,right-.07));pt.u=clamp(unprojectU(p.y),state.view.umin,state.view.umax);invalidate();updateEquilibria();reset();}});
+function endPointer(e){state.drag=null;try{canvas.releasePointerCapture(e.pointerId);}catch{}draw();}canvas.addEventListener('pointerup',endPointer);canvas.addEventListener('pointercancel',endPointer);
+function validNudgeEnergy(){
+ const input=$('deltaE'),amount=Number(input.value);
+ const valid=input.value.trim()!==''&&Number.isFinite(amount)&&amount>=0.01;
+ input.classList.toggle('input-error',!valid);
+ $('deltaEHelp').classList.toggle('hidden',valid);
+ $('nudgeLeft').disabled=!valid;$('nudgeRight').disabled=!valid;
+ return valid?amount:null;
+}
+function nudge(dir){
+ if(state.nudge)return;
+ const amount=validNudgeEnergy();
+ if(amount===null){msg('Enter a positive nudge energy (at least 0.01 J).');return;}
+ stop();state.nudge={dir,amount,age:0,impacted:false,startX:state.x,startU:U(state.x)};syncPlay();requestAnimationFrame(frame);
+}
+function impact(n){const k=.5*state.m*state.v*state.v+n.amount;state.v=n.dir*Math.sqrt(2*k/state.m);state.E=U(state.x)+k;state.acc=F(state.x)/state.m;fitEnergyIfNeeded();state.playing=true;state.t0=null;updateStats();}
+// Velocity-Verlet step with conservation of total energy.
+// Graph x-limits are VIEWPORT boundaries, not reflecting walls. Motion is
+// allowed beyond either edge; only U(x) > E can cause a physical turning point.
+function advance(h){
+ const old=state.x,prevV=state.v,a0=F(old)/state.m;
+ const cand=old+prevV*h+.5*a0*h*h,vPredict=prevV+a0*h;
+ if(!Number.isFinite(cand)){stop();msg('Motion exceeded the numerical range. Reset to begin again.');return;}
+ const u=U(cand);
+ if(!Number.isFinite(u)){stop();msg('Potential is not defined beyond this position.');return;}
+ if(u>state.E+1e-8){
+   // A real turning point: find U(x) = E between the last accessible position
+   // and the proposed one. Reverse ONLY here, never at the graph border.
+   let a=old,b=cand;
+   if(U(a)>state.E+1e-6){stop();return;}
+   for(let k=0;k<45;k++){const mid=(a+b)/2;if(U(mid)<=state.E)a=mid;else b=mid;}
+   state.x=a;
+   state.v=-Math.sign(cand-old)*Math.sqrt(Math.max(0,2*(state.E-U(a))/state.m));
+   if(!Number.isFinite(state.v))state.v=0;
+ }else{
+   state.x=cand;
+   const a1=F(state.x)/state.m;
+   const vn=vPredict+.5*a1*h;
+   const sign=Math.sign(vn)||Math.sign(prevV)||1;
+   state.v=sign*Math.sqrt(Math.max(0,2*(state.E-u)/state.m));
+ }
+ state.acc=F(state.x)/state.m;
+ if(!Number.isFinite(state.acc)||!Number.isFinite(state.v)){
+   stop();msg('The motion could not be calculated at this position.');
+ }
+}
+let nextAnim=false;function frame(ts){if(nextAnim)return;nextAnim=true;try{if(state.t0===null)state.t0=ts;let dt=Math.min(.045,Math.max(0,(ts-state.t0)/1000));state.t0=ts;let doMore=false;if(state.nudge){const n=state.nudge;n.age+=dt/.65;if(!n.impacted&&n.age>=.38){n.impacted=true;impact(n);}if(n.age>=1)state.nudge=null;else doMore=true;}
+if(state.playing){let remain=dt*num('speed',1);let guard=0;while(remain>1e-8&&guard++<80){const h=Math.min(.0075,remain);advance(h);remain-=h;if(!state.playing)break;}doMore=state.playing||doMore;updateStats();}syncPlay();draw();if(doMore)requestAnimationFrame(frame);}finally{nextAnim=false;}}
+function startAnimation(){state.t0=null;requestAnimationFrame(frame);}
+$('play').addEventListener('click',()=>{if(state.nudge)return;state.playing=!state.playing;state.t0=null;syncPlay();if(state.playing)startAnimation();else draw();});
+$('reset').addEventListener('click',reset);
+$('addPoint').addEventListener('click',()=>{state.adding=!state.adding;refreshAddButton();msg(state.adding?'Click the plot to create points; drag any point to adjust it.':'Point creation turned off.');});
+$('deletePoint').addEventListener('click',()=>{if(!state.selected){msg('Select a registration point first.');return;}state.points=state.points.filter(p=>p!==state.selected);state.selected=null;invalidate();updateEquilibria();reset();});
+$('sampleCurve').addEventListener('click',()=>{state.points=sample.map(p=>({...p}));state.selected=null;invalidate();updateEquilibria();reset();fit();});
+$('clearCurve').addEventListener('click',()=>{state.points=[];state.selected=null;invalidate();updateEquilibria();reset();});
+$('buildMode').addEventListener('change',()=>{if($('buildMode').value==='equation'&&!state.eqFn){try{state.eqFn=compile($('equation').value);}catch(err){msg(err.message);$('buildMode').value='points';return;}}refreshMode();fit();});
+$('applyEquation').addEventListener('click',()=>{try{const f=compile($('equation').value);state.eqFn=f;state.expression=$('equation').value;updateEquilibria();reset();fit();}catch(err){msg(err.message);}});
+$('deltaE').addEventListener('input',validNudgeEnergy);
+$('deltaE').addEventListener('change',validNudgeEnergy);
+$('nudgeLeft').addEventListener('click',()=>{nudge(-1);});$('nudgeRight').addEventListener('click',()=>{nudge(1);});
+$('snapNearest').addEventListener('click',()=>{if(!state.eqs.length){msg('No isolated equilibrium point found in this range.');return;}stop();const x=snapPosition(state.x,true);$('x0').value=Number(x.toFixed(6));setAt(x,num('initialKE',0));fitEnergyIfNeeded();draw();});
+for(const id of ['x0','initialKE','mass','direction'])$(id).addEventListener('change',()=>{stop();reset();});
+$('speed').addEventListener('change',()=>{state.t0=null;});
+for(const id of ['showMarble','showEnergy','showForce','showKE','showEquilibria','showGrid'])$(id).addEventListener('change',draw);
+function applyRanges(){let xmin=num('xmin',0),xmax=num('xmax',10),umin=num('umin',-1),umax=num('umax',11);if(xmax-xmin<.5||umax-umin<.5){msg('The displayed x and U ranges must each span at least 0.5.');return;}state.view={xmin,xmax,umin,umax};updateEquilibria();reset();}
+$('toggleRange').addEventListener('click',()=>{const editor=$('rangeEditor'),opening=editor.classList.contains('hidden');editor.classList.toggle('hidden',!opening);$('toggleRange').setAttribute('aria-expanded',String(opening));});
+$('applyAxes').addEventListener('click',applyRanges);$('fitAxes').addEventListener('click',fit);$('fitTop').addEventListener('click',fit);
+// Initialize
+state.points=sample.map(p=>({...p}));sortPts();invalidate();updateEquilibria();setAt(num('x0',1.2),0);syncPlay();validNudgeEnergy();draw();
+})();
+</script>
+</body></html>
