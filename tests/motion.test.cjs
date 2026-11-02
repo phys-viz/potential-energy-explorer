@@ -133,12 +133,17 @@ test('animation uses fixed 5 ms steps at each playback speed', () => {
   }
 });
 
-test('number formatting stays compact for large and small values', () => {
+test('readouts stay in decimal format through zero and compact for large values', () => {
   const source = html.slice(html.indexOf('function scientific(x)'), html.indexOf('function setReading('));
   const fmt = runInNewContext(source + '\nfmt');
   assert.equal(fmt(2.864978268e9), '2.86e+9');
   assert.equal(fmt(-2.951691122e10), '-2.95e+10');
-  assert.equal(fmt(1e-9), '1.00e-9');
+  assert.equal(fmt(1e-9), '0.00');
+  assert.equal(fmt(-1e-9), '0.00');
+  assert.equal(fmt(.0049), '0.00');
+  assert.equal(fmt(-.0049), '0.00');
+  assert.equal(fmt(.0051), '0.01');
+  assert.equal(fmt(-.0051), '-0.01');
   assert.equal(fmt(.5), '0.50');
   assert.equal(fmt(0), '0.00');
 });

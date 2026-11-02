@@ -194,7 +194,7 @@ main {padding:10px}
 .readout-panel .stat .number.scientific{font-size:20px}
 .readout-panel .stat .unit{font-size:13px}
 .readout-panel .status{display:block;margin-top:9px;font-size:12px;line-height:1.4}
-.readout-panel #eqStatus{display:block;margin-top:5px}
+.readout-panel #eqStatus{display:block;min-height:4.2em;margin-top:8px;font-size:12px;line-height:1.4;text-align:center}
 .readout-panel .motion-note{font-size:12px}
 .readout-panel .motion-note .btn{width:100%;font-size:12px}
 .initial-group .msg{background:#eef5ff;color:#365e90;line-height:1.4}
@@ -328,7 +328,7 @@ main {padding:10px}
 <aside class="panel readout-panel" aria-label="Live measurements">
  <h2 class="sidebar-title">Live measurements</h2>
  <div id="motionNote" class="motion-note hidden" role="status"><div id="motionText"></div><button type="button" class="btn" id="continueOutside">Continue outside view</button></div>
- <div class="status"><span id="statusText">Paused</span><span id="eqStatus">—</span></div>
+ <div class="status"><span id="statusText">Paused</span></div>
  <div class="statbar">
   <div class="stat"><div class="name">Position, x</div><div class="reading"><span id="xRead" class="number">1.20</span><span class="unit">m</span></div></div>
   <div class="stat"><div class="name">Velocity, v</div><div class="reading"><span id="vRead" class="number">0.00</span><span class="unit">m/s</span></div></div>
@@ -337,6 +337,7 @@ main {padding:10px}
   <div class="stat"><div class="name">Kinetic, KE</div><div class="reading"><span id="keRead" class="number">0.00</span><span class="unit">J</span></div></div>
   <div class="stat"><div class="name">Total, E</div><div class="reading"><span id="eRead" class="number energytext">0.00</span><span class="unit">J</span></div></div>
  </div>
+ <div id="eqStatus" aria-live="off"></div>
 </aside>
 </div></div>
 <form id="axisEditor" class="axis-editor hidden" role="dialog" aria-labelledby="axisEditLabel">
@@ -357,13 +358,13 @@ const state={mode:'points',adding:false,points:[],selected:null,drag:null,playin
 const sample=[{x:0.18,u:8.7},{x:1.20,u:4.1},{x:2.35,u:1.05},{x:5.12,u:5.55},{x:7.35,u:2.36},{x:9.7,u:9.4}];
 function clamp(x,a,b){return Math.max(a,Math.min(b,x));}
 function num(id,fallback){let v=Number($(id).value);return Number.isFinite(v)?v:fallback;}
-function scientific(x){return Math.abs(x)>=1000||(Math.abs(x)>0&&Math.abs(x)<.005);}
-function fmt(x){if(!Number.isFinite(x))return '—';return scientific(x)?x.toExponential(2):x.toFixed(2);}
+function scientific(x){return Math.abs(x)>=1000;}
+function fmt(x){if(!Number.isFinite(x))return '—';if(Math.abs(x)<.005)return '0.00';return scientific(x)?x.toExponential(2):x.toFixed(2);}
 function setReading(id,value){
  const node=$(id),sci=Number.isFinite(value)&&scientific(value);
  node.classList.toggle('scientific',sci);
- if(sci){const [mantissa,exponent]=value.toExponential(2).split('e');node.innerHTML=`${mantissa}<span class="times">×</span>10<sup>${Number(exponent)}</sup>`;}
- else node.textContent=fmt(value);
+ if(sci){const [mantissa,exponent]=value.toExponential(2).split('e');const html=`${mantissa}<span class="times">×</span>10<sup>${Number(exponent)}</sup>`;if(node.innerHTML!==html)node.innerHTML=html;}
+ else{const label=fmt(value);if(node.textContent!==label)node.textContent=label;}
  node.title=Number.isFinite(value)?String(value):'Undefined';
 }
 function msg(text){const node=$('notice');node.textContent=text;node.classList.add('show');clearTimeout(state.msgTimeout);state.msgTimeout=setTimeout(()=>node.classList.remove('show'),3200);}
