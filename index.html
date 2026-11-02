@@ -242,6 +242,20 @@ main {padding:10px}
 .axis-limit,.axis-limit:hover,.axis-limit:focus-visible{background:#fff}
 .control-panel .group input[type="checkbox"]{accent-color:var(--sec)}
 .control-panel .group :is(input,select,textarea):focus:not(.input-error):not([aria-invalid="true"]){border-color:var(--sec);outline:2px solid var(--sec);outline-offset:2px;box-shadow:none}
+/* Stronger outlines make the left-hand controls easier to identify. */
+.control-panel .group{border:2px solid var(--sec);border-left-width:4px;box-shadow:none}
+.control-panel .group :is(input:not([type="checkbox"]),select,textarea),.control-panel .group .btn{border:2px solid var(--sec)}
+.control-panel select{cursor:pointer}
+.control-panel :is(.btn,select){transition:border-color .15s,outline-color .15s,color .15s}
+.control-panel :is(.btn,select):hover:not(:disabled){outline:2px solid var(--sec);outline-offset:2px;background:#fff}
+.control-panel .btn:hover:not(:disabled){color:var(--sec)}
+.control-panel .initial-actions .btn{padding:4px 3px;line-height:1.1}
+.control-panel .group .option input[type="checkbox"]{appearance:none;width:15px;height:15px;display:inline-grid;place-content:center;transform:none;border:2px solid var(--sec);border-radius:3px;background:#fff;cursor:pointer}
+.control-panel .group .option input[type="checkbox"]:checked{background:var(--sec)}
+.control-panel .group .option input[type="checkbox"]:checked::after{content:"";width:7px;height:4px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:translateY(-1px) rotate(-45deg)}
+.control-panel .group .option:hover input[type="checkbox"]{outline:2px solid var(--sec);outline-offset:2px}
+.control-panel .group :is(input,textarea)[aria-invalid="true"],.control-panel .group input.input-error{border-color:#bc3838}
+.control-panel .group select[aria-invalid="true"]:hover{outline-color:#bc3838}
 </style>
 </head>
 <body>
