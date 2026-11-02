@@ -196,7 +196,6 @@ main {padding:10px}
 .readout-panel .stat .number.scientific{font-size:20px}
 .readout-panel .stat .unit{font-size:13px}
 .readout-panel .status{display:block;margin-top:9px;font-size:12px;line-height:1.4}
-.readout-panel #eqStatus{display:block;min-height:4.2em;margin-top:8px;font-size:12px;line-height:1.4;text-align:center}
 .readout-panel .motion-note{font-size:12px}
 .readout-panel .motion-note .btn{width:100%;font-size:12px}
 .initial-group .msg{background:#eef5ff;color:#365e90;line-height:1.4}
@@ -339,7 +338,6 @@ main {padding:10px}
   <div class="stat"><div class="name">Kinetic, KE</div><div class="reading"><span id="keRead" class="number">0.00</span><span class="unit">J</span></div></div>
   <div class="stat"><div class="name">Total, E</div><div class="reading"><span id="eRead" class="number energytext">0.00</span><span class="unit">J</span></div></div>
  </div>
- <div id="eqStatus" aria-live="off"></div>
 </aside>
 </div></div>
 <form id="axisEditor" class="axis-editor hidden" role="dialog" aria-labelledby="axisEditLabel">
@@ -535,7 +533,6 @@ function reset(){state.nudge=null;stop();const read=id=>$(id).value.trim()===''?
 function updateStats(){
  const k=.5*state.m*state.v*state.v;
  for(const [id,value] of [['xRead',state.x],['vRead',state.v],['aRead',state.acc],['uRead',U(state.x)],['keRead',k],['eRead',state.E]])setReading(id,value);
- let near=state.eqs.find(e=>Math.abs(e.x-state.x)<.015);$('eqStatus').textContent=near?`${near.kind[0].toUpperCase()+near.kind.slice(1)} equilibrium at x = ${fmt(near.x)} m`:' ';
 }
 function fitEnergyIfNeeded(){if(!state.uManual&&state.E>state.view.umax-.3)state.view.umax=state.E+Math.max(1,(state.view.umax-state.view.umin)*.10);}
 function fit(){let lo=Infinity,hi=-Infinity;for(let i=0;i<=800;i++){let x=state.view.xmin+(state.view.xmax-state.view.xmin)*i/800;let val=U(x);if(Number.isFinite(val)){lo=Math.min(lo,val);hi=Math.max(hi,val);}}if(!Number.isFinite(lo)){lo=0;hi=10;}hi=Math.max(hi,state.E);const pad=Math.max(0.75,(hi-lo)*.12);state.view.umin=lo-pad;state.view.umax=hi+pad;state.uManual=false;state.forceView=null;draw();}
